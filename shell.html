@@ -1,0 +1,23 @@
+<title>Gordon's Desk</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{--bg:#F2F5F7;--ink:#14222B;--ink3:#8396A3}
+:root:not([data-theme="light"]){} @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#101820;--ink:#E7EFF4;--ink3:#788C99}} :root[data-theme="dark"]{--bg:#101820;--ink:#E7EFF4;--ink3:#788C99}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Figtree,system-ui,sans-serif}
+#desk-boot{padding:48px 16px;max-width:720px;margin:0 auto;font-size:15px;color:var(--ink3)}
+#desk-boot b{display:block;color:var(--ink);font-size:17px;margin-bottom:6px}
+</style>
+<div id="desk-root"><div id="desk-boot"><b>Gordon's Desk</b>Loading the dashboard…</div></div>
+<script>
+/* Thin shell. The whole dashboard lives in desk.js, published once and shared by every copy of this page.
+   This page is owned by the person opening it, so Claude offers them their own connectors. */
+window.addEventListener("error", function(e){
+  var b = document.getElementById("desk-boot");
+  if(b && !window.__GD_DESK_LOADED){ b.innerHTML = "<b>The dashboard script didn't load</b>Check the connection and refresh. If it keeps failing, tell Elsa — the shared script may be unavailable."; }
+}, true);
+setTimeout(function(){ var b = document.getElementById("desk-boot"); if(b && !window.__GD_DESK_LOADED) b.innerHTML = "<b>The dashboard script didn't load</b>Check the connection and refresh. If it keeps failing, tell Elsa — the shared script may be unavailable."; }, 15000);
+</script>
+<script src="https://cdn.jsdelivr.net/npm/wa-gordons-desk@1/dist/desk.js"></script>

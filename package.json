@@ -1,0 +1,9 @@
+{
+  "name": "wa-gordons-desk",
+  "version": "1.0.0",
+  "description": "Gordon's Desk — Wheel & Anchor CEO dashboard shell script. Holds no data; reads Monday, Gmail and Google Calendar live through the viewer's own Claude connectors.",
+  "main": "dist/desk.js",
+  "files": ["dist/desk.js"],
+  "license": "UNLICENSED",
+  "private": false
+}

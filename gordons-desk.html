@@ -1,0 +1,1488 @@
+<title>Gordon's Desk</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one column — masthead, signal strip, filter rail, tabbed lists.
+   Reads Monday live on every open. Lists mirror Monday: area > group > project > subitem. Rows, never cards. */
+:root{
+  --bg:#F2F5F7; --surface:#FFFFFF; --sunk:#E7EDF1; --sunk2:#EFF3F6;
+  --ink:#14222B; --ink2:#4D6170; --ink3:#8396A3; --line:#DBE4EA;
+  --accent:#0F5C6B; --accent-soft:#D6EBEF;
+  --ready-bg:#DCE6FB; --ready-fg:#2B3F8C;
+  --working-bg:#FBE6CB; --working-fg:#8A4C10;
+  --info-bg:#FBDDD3; --info-fg:#93361B;
+  --done-bg:#D8EEDE; --done-fg:#1E6039;
+  --closed-bg:#CDE5D6; --closed-fg:#0C4A2C;
+  --none-bg:#E7EDF1; --none-fg:#5E7280;
+  --req-bg:#EADCF5; --req-fg:#5C2E7A;
+  --late-bg:#F8D8D8; --late-fg:#97262A;
+  --today-fg:#0B5160; --ok-fg:#1E6039;
+  --k1:#C9DCF7; --k1f:#1F4480;  --k2:#D6EBDC; --k2f:#1F6038;
+  --k3:#FBE0E8; --k3f:#8C2B4C;  --k4:#FAE3CF; --k4f:#8A4A14;
+  --k5:#CFE9E4; --k5f:#145C50;  --k6:#E3DDF9; --k6f:#453394;
+  --k7:#DCE3E9; --k7f:#3C5160;  --k8:#EBDFF2; --k8f:#5F2F77;
+  --k9:#F5E2BE; --k9f:#75530C;  --k10:#D9E7F2; --k10f:#2A5272;
+  --shadow:0 1px 2px rgba(20,34,43,.05),0 4px 16px rgba(20,34,43,.045);
+  --f-display:"Young Serif",Georgia,"Times New Roman",serif;
+  --f-body:"Figtree",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --r:12px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#101820; --surface:#18222B; --sunk:#141D25; --sunk2:#1C2730;
+  --ink:#E7EFF4; --ink2:#AFC0CC; --ink3:#788C99; --line:#263340;
+  --accent:#6FC6D6; --accent-soft:#17323B;
+  --ready-bg:#232E55; --ready-fg:#B9C8F6;
+  --working-bg:#3B2A14; --working-fg:#F2C68A;
+  --info-bg:#3E2219; --info-fg:#F3B49B;
+  --done-bg:#19331F; --done-fg:#9FD9B2;
+  --closed-bg:#12301E; --closed-fg:#8CCBA4;
+  --none-bg:#1E2832; --none-fg:#9BAEBB;
+  --req-bg:#2C1B3A; --req-fg:#CFA9E6;
+  --late-bg:#3D2023; --late-fg:#F0AAAC;
+  --today-fg:#93D6E2; --ok-fg:#9FD9B2;
+  --k1:#1C2D4A; --k1f:#AFC8EE;  --k2:#1A3324; --k2f:#A3D5B3;
+  --k3:#3A2029; --k3f:#F0B2C4;  --k4:#3A2616; --k4f:#EDBB8C;
+  --k5:#123330; --k5f:#95D3C8;  --k6:#272052; --k6f:#C3B8F3;
+  --k7:#222E38; --k7f:#AFC2CF;  --k8:#2D1E38; --k8f:#D5B3E6;
+  --k9:#352A12; --k9f:#E3C684;  --k10:#1B2B38; --k10f:#A9C6DD;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 6px 18px rgba(0,0,0,.28);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#101820; --surface:#18222B; --sunk:#141D25; --sunk2:#1C2730;
+  --ink:#E7EFF4; --ink2:#AFC0CC; --ink3:#788C99; --line:#263340;
+  --accent:#6FC6D6; --accent-soft:#17323B;
+  --ready-bg:#232E55; --ready-fg:#B9C8F6;
+  --working-bg:#3B2A14; --working-fg:#F2C68A;
+  --info-bg:#3E2219; --info-fg:#F3B49B;
+  --done-bg:#19331F; --done-fg:#9FD9B2;
+  --closed-bg:#12301E; --closed-fg:#8CCBA4;
+  --none-bg:#1E2832; --none-fg:#9BAEBB;
+  --req-bg:#2C1B3A; --req-fg:#CFA9E6;
+  --late-bg:#3D2023; --late-fg:#F0AAAC;
+  --today-fg:#93D6E2; --ok-fg:#9FD9B2;
+  --k1:#1C2D4A; --k1f:#AFC8EE;  --k2:#1A3324; --k2f:#A3D5B3;
+  --k3:#3A2029; --k3f:#F0B2C4;  --k4:#3A2616; --k4f:#EDBB8C;
+  --k5:#123330; --k5f:#95D3C8;  --k6:#272052; --k6f:#C3B8F3;
+  --k7:#222E38; --k7f:#AFC2CF;  --k8:#2D1E38; --k8f:#D5B3E6;
+  --k9:#352A12; --k9f:#E3C684;  --k10:#1B2B38; --k10f:#A9C6DD;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 6px 18px rgba(0,0,0,.28);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1220px;margin:0 auto;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:26px 90px;display:flex;flex-direction:column;gap:18px}
+a{color:inherit}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+.mast{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 24px}
+.mast h1{font-family:var(--f-display);font-weight:400;font-size:clamp(27px,4.2vw,38px);line-height:1.1;margin:0;text-wrap:balance;letter-spacing:-.01em}
+.eyebrow{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px;font-weight:600}
+.mast-right{display:flex;align-items:center;gap:10px}
+.sync{display:flex;flex-direction:column;align-items:flex-end;gap:1px;font-size:12px;color:var(--ink3);text-align:right}
+.sync b{font-family:var(--f-mono);font-weight:500;color:var(--ink2);font-size:12px}
+.refresh{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:7px;color:var(--ink2);box-shadow:var(--shadow)}
+.refresh:hover{border-color:var(--accent);color:var(--accent)}
+.refresh[disabled]{opacity:.55;cursor:default}
+.refresh svg{width:14px;height:14px}
+.spin{animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+.strip{display:flex;flex-wrap:wrap;gap:8px}
+.stat{display:flex;align-items:baseline;gap:8px;padding:7px 13px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:13px;color:var(--ink2)}
+.stat b{font-family:var(--f-mono);font-weight:500;font-size:15px;color:var(--ink)}
+.stat.go{background:var(--ready-bg);border-color:transparent;color:var(--ready-fg)}
+.stat.go b{color:var(--ready-fg)}
+.stat.warn{background:var(--working-bg);border-color:transparent;color:var(--working-fg)}
+.stat.warn b{color:var(--working-fg)}
+.stat.hot{background:var(--late-bg);border-color:transparent;color:var(--late-fg)}
+.stat.hot b{color:var(--late-fg)}
+
+.note{display:flex;align-items:flex-start;gap:11px;padding:13px 15px;border-radius:12px;background:var(--surface);border:1px solid var(--line);font-size:13.5px;color:var(--ink2);box-shadow:var(--shadow)}
+.note.bad{background:var(--late-bg);border-color:transparent;color:var(--late-fg)}
+.note b{color:inherit;display:block;font-size:14px;margin-bottom:2px}
+.note .ni{flex:none;width:20px;height:20px;margin-top:1px}
+.note .ni svg{width:20px;height:20px}
+
+.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{border:0;background:none;padding:10px 13px;font-weight:600;font-size:14px;color:var(--ink3);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;display:flex;gap:6px;align-items:center}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab .n{font-family:var(--f-mono);font-weight:500;font-size:11.5px;background:var(--sunk);color:var(--ink2);border-radius:999px;padding:1px 6px}
+.view[hidden]{display:none!important}
+
+.rail{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);
+  padding:10px 12px;display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center}
+.search{flex:1 1 200px;min-width:0;display:flex;align-items:center;gap:8px;background:var(--sunk);border:1px solid transparent;border-radius:9px;padding:0 10px}
+.search:focus-within{border-color:var(--accent)}
+.search input{flex:1;min-width:0;border:0;background:transparent;font-size:14px;padding:8px 0;outline:none}
+.search svg{width:15px;height:15px;color:var(--ink3);flex:none}
+.fld{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink3);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.fld select{font-size:13px;font-weight:500;letter-spacing:0;text-transform:none;background:var(--sunk);border:1px solid transparent;border-radius:9px;padding:7px 8px;max-width:200px;cursor:pointer}
+.fld.on select{border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
+.toggle{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink2);font-weight:500;cursor:pointer;white-space:nowrap}
+.toggle input{accent-color:var(--accent);width:15px;height:15px}
+.clear{border:1px solid var(--line);background:none;border-radius:999px;padding:6px 12px;font-size:12.5px;font-weight:600;color:var(--ink2)}
+.clear:hover{border-color:var(--ink3);color:var(--ink)}
+
+.viewdesc{margin:0 2px 16px;font-size:13.5px;line-height:1.5;color:var(--ink2);max-width:72ch;
+  border-left:3px solid var(--accent-soft);padding-left:12px}
+.sec{display:flex;flex-direction:column;gap:7px}
+.sec+.sec{margin-top:16px}
+.sec-h{display:flex;align-items:baseline;gap:10px;padding:2px;flex-wrap:wrap}
+.sec-h h2{font-family:var(--f-display);font-weight:400;font-size:19px;margin:0}
+.sec-h .count{font-family:var(--f-mono);font-size:12.5px;color:var(--ink3)}
+.sec-h .hint{font-size:12.5px;color:var(--ink3);margin-left:auto;text-align:right}
+.list{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+
+.cols{display:grid;grid-template-columns:minmax(0,1fr) 82px 178px 112px 70px 32px;gap:10px;align-items:center}
+.lhead{padding:0 14px;background:var(--sunk);border-bottom:1px solid var(--line)}
+.lhead button,.lhead span{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:600;color:var(--ink3);
+  background:none;border:0;padding:9px 0;text-align:left;display:flex;align-items:center;gap:4px}
+.lhead button:hover{color:var(--ink)}
+.lhead button.on{color:var(--accent)}
+.lhead .arrow{font-size:9px}
+
+.row{padding:9px 14px;border-top:1px solid var(--line)}
+.list .row:first-child{border-top:0}
+.row:hover{background:color-mix(in srgb,var(--sunk) 45%,transparent)}
+.row.ctx{background:var(--sunk2)}
+.row.ctx .r-title{color:var(--ink2)}
+.row.dim .r-title{color:var(--ink3);text-decoration:line-through}
+.row{--ind:0px}
+.row.nested.lv0{--ind:58px}
+.row.nested.lv1{--ind:82px}
+.row.nested.lv2{--ind:106px}
+.r-main{min-width:0;display:flex;flex-direction:column;gap:2px;padding-left:var(--ind);position:relative}
+.row.nested .r-main::before{content:"";position:absolute;left:calc(var(--ind) - 16px);top:1px;bottom:1px;width:2px;background:var(--line);border-radius:2px}
+.row.nested.lv1 .r-main::before,.row.nested.lv2 .r-main::before{background:var(--ink3);opacity:.35}
+.r-top{display:flex;align-items:center;gap:7px;min-width:0}
+.r-title{font-weight:600;font-size:14.5px;overflow-wrap:anywhere;min-width:0}
+.row.proj .r-title{font-size:15px}
+.caret{border:0;background:none;color:var(--ink3);font-size:11px;width:16px;height:16px;padding:0;flex:none;display:grid;place-items:center;transition:transform .15s}
+.caret.open{transform:rotate(90deg)}
+.r-sub{font-size:12.5px;color:var(--ink3);display:flex;flex-wrap:wrap;gap:3px 8px;align-items:center}
+.sep{opacity:.5}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;border-radius:999px;padding:2px 8px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;border-radius:6px;padding:2px 7px;background:var(--sunk);color:var(--ink2);text-decoration:none}
+.tag:hover{color:var(--ink)}
+.tag.warnflag{background:var(--late-bg);color:var(--late-fg)}
+.tag.trip{background:var(--accent-soft);color:var(--accent);font-variant-numeric:tabular-nums}
+.type{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink3)}
+.type.t-Action{color:var(--accent)}
+.type.t-Project{color:var(--k1f)}
+.type.t-OpenFile{color:var(--ink2)}
+.type.t-Idea{color:var(--k8f)}
+
+.stcell{display:flex;flex-direction:column;gap:2px;min-width:0}
+select.stsel{font-size:11.5px;font-weight:600;border:1px solid transparent;border-radius:999px;padding:4px 8px;width:100%;max-width:178px;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:none}
+select.stsel:hover{border-color:var(--ink3)}
+.v-ready{background:var(--ready-bg);color:var(--ready-fg)}
+.v-working{background:var(--working-bg);color:var(--working-fg)}
+.v-info{background:var(--info-bg);color:var(--info-fg)}
+.v-done{background:var(--done-bg);color:var(--done-fg)}
+.v-closed{background:var(--closed-bg);color:var(--closed-fg)}
+.v-none{background:var(--none-bg);color:var(--none-fg)}
+.v-req{background:var(--req-bg);color:var(--req-fg)}
+select.stsel option{background:var(--surface);color:var(--ink)}
+.stmsg{font-size:10.5px;color:var(--ink3);font-family:var(--f-mono)}
+.stmsg.err{color:var(--late-fg);font-family:var(--f-body);font-weight:500;letter-spacing:0}
+.stmsg.ok{color:var(--ok-fg)}
+.stpill{display:inline-flex;align-items:center;font-size:11.5px;font-weight:600;border-radius:999px;padding:4px 9px;white-space:nowrap}
+
+.due{font-family:var(--f-mono);font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--ink2);white-space:nowrap}
+.due.late{color:var(--late-fg);font-weight:500}
+.due.now{color:var(--today-fg);font-weight:500}
+.due.never{color:var(--ink3)}
+.donebtn{border:1px solid var(--line);background:none;border-radius:999px;padding:4px 9px;font-size:11.5px;font-weight:600;color:var(--ink2);white-space:nowrap}
+.donebtn:hover{border-color:var(--ok-fg);color:var(--ok-fg);background:var(--done-bg)}
+.donebtn[disabled]{opacity:.5;cursor:default}
+.open{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--ink3);text-decoration:none;border:1px solid transparent;justify-self:end}
+.open:hover{background:var(--sunk);color:var(--accent);border-color:var(--line)}
+.open svg{width:15px;height:15px}
+.empty{padding:16px 14px;font-size:13.5px;color:var(--ink3)}
+
+.band{display:flex;align-items:center;gap:10px;width:100%;padding:9px 14px;background:var(--sunk);border:0;border-top:1px solid var(--line);text-align:left}
+.list>.band:first-child{border-top:0}
+.band.area .bname{font-family:var(--f-display);font-size:16px;font-weight:400}
+.band.grp{background:var(--sunk2);padding-left:36px}
+.band.grp .bname{font-size:12.5px;font-weight:600;color:var(--ink2);letter-spacing:.02em}
+.band .count{font-family:var(--f-mono);font-size:12px;color:var(--ink3)}
+.band .bbar{margin-left:auto;display:flex;gap:5px;align-items:center}
+
+.day{display:flex;align-items:baseline;gap:10px;padding:9px 14px;background:var(--sunk);border-top:1px solid var(--line)}
+.list>.day:first-child{border-top:0}
+.day .dname{font-weight:600;font-size:13.5px}
+.day .ddate{font-family:var(--f-mono);font-size:12px;color:var(--ink3)}
+.day .dcount{font-family:var(--f-mono);font-size:12px;color:var(--ink3);margin-left:auto}
+
+.mrow{display:grid;grid-template-columns:minmax(0,1fr) 32px;gap:10px;align-items:center;padding:9px 14px;border-top:1px solid var(--line)}
+.list .mrow:first-child{border-top:0}
+.mrow:hover{background:color-mix(in srgb,var(--sunk) 45%,transparent)}
+.m-main{min-width:0;display:flex;flex-direction:column;gap:2px}
+.m-subj{font-weight:600;font-size:14.5px;text-decoration:none;overflow-wrap:anywhere}
+.m-subj:hover{text-decoration:underline;text-decoration-color:var(--ink3)}
+.m-sub{font-size:12.5px;color:var(--ink3);display:flex;flex-wrap:wrap;gap:3px 8px;align-items:baseline}
+.m-sub .from{color:var(--ink2);font-weight:500}
+.m-sub .when{font-family:var(--f-mono);font-size:12px}
+.m-snip{font-size:13px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.crow{display:grid;grid-template-columns:108px minmax(0,1fr) auto 32px;gap:10px;align-items:center;padding:9px 14px;border-top:1px solid var(--line)}
+.list .crow:first-child{border-top:0}
+.crow:hover{background:color-mix(in srgb,var(--sunk) 45%,transparent)}
+.c-time{font-family:var(--f-mono);font-size:12.5px;color:var(--ink2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.c-time.now{color:var(--today-fg);font-weight:500}
+.c-time.past{color:var(--ink3)}
+.c-main{min-width:0;display:flex;flex-direction:column;gap:2px}
+.c-title{font-weight:600;font-size:14.5px;overflow-wrap:anywhere}
+.c-sub{font-size:12.5px;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mrow{grid-template-columns:minmax(0,1fr) auto 32px}
+.tag.ask{background:var(--accent-soft);color:var(--accent);cursor:pointer;border:0;font:inherit;font-size:11px;font-weight:600;white-space:nowrap}
+.tag.ask:hover{color:var(--accent)}
+.tag.ask[disabled]{opacity:.6;cursor:default}
+.m-ask{padding:4px 14px 14px 14px;font-size:13.5px;line-height:1.5;color:var(--ink)}
+.m-ask .box{background:var(--accent-soft);border-radius:10px;padding:12px 14px;white-space:pre-wrap;overflow-wrap:anywhere}
+.m-ask .box b{display:block;margin-top:8px}
+.m-ask .box b:first-child{margin-top:0}
+.m-ask .box.think{color:var(--ink3);font-style:italic}
+.m-ask .box.bad{background:var(--late-bg);color:var(--late-fg)}
+@media (max-width:640px){ .mrow{grid-template-columns:minmax(0,1fr) 32px} .mrow .tag.ask{grid-column:1;justify-self:start} .mrow .open{grid-column:2;grid-row:1} }
+.tag.plus{background:var(--sunk);color:var(--ink2);cursor:pointer;border:0;font:inherit;font-size:11px;font-weight:600;white-space:nowrap}
+.tag.plus:hover{color:var(--accent);background:var(--accent-soft)}
+.mrow.owner{grid-template-columns:minmax(0,1fr) auto auto 32px}
+@media (max-width:640px){ .mrow.owner{grid-template-columns:minmax(0,1fr) 32px} .mrow.owner .tag.plus{grid-column:1;justify-self:start} }
+.modal-bg{position:fixed;inset:0;background:rgba(10,20,28,.45);display:flex;align-items:flex-start;justify-content:center;padding:4vh 16px;z-index:50;overflow:auto}
+.modal{background:var(--surface);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.25);width:min(560px,100%);padding:20px 22px 18px;display:flex;flex-direction:column;gap:12px}
+.modal h3{font-family:var(--f-display);font-weight:400;font-size:21px;margin:0}
+.modal .sub{font-size:13px;color:var(--ink3);margin-top:-8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fld{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--ink2);font-weight:500}
+.fld input,.fld select,.fld textarea{font-size:14px;font-weight:400;color:var(--ink);background:var(--sunk2);border:1px solid var(--line);border-radius:9px;padding:8px 10px;width:100%}
+.fld textarea{min-height:88px;resize:vertical;line-height:1.4}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:2px solid var(--accent);outline-offset:0;border-color:transparent}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){.frow{grid-template-columns:1fr}}
+.fchk{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink)}
+.fchk input{width:16px;height:16px;accent-color:var(--accent)}
+.flink{font-size:12.5px;color:var(--accent);background:none;border:0;padding:0;cursor:pointer;align-self:flex-start;font-weight:600}
+.flink[disabled]{opacity:.5;cursor:default}
+.mact{display:flex;gap:10px;justify-content:flex-end;align-items:center;margin-top:4px;flex-wrap:wrap}
+.mact .note{margin-right:auto;font-size:13px;color:var(--ink2)}
+.mact .note.err{color:var(--late-fg)}
+.mact .note a{color:var(--accent);font-weight:600}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 16px;font-size:13.5px;font-weight:600;color:var(--ink2)}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{filter:brightness(1.08);color:#fff}
+.btn[disabled]{opacity:.55;cursor:default;filter:none}
+.tag.join{background:var(--done-bg);color:var(--done-fg)}
+.tag.join:hover{color:var(--ok-fg)}
+.srcnote{padding:12px 14px;font-size:13px;color:var(--ink2);display:flex;gap:10px;align-items:flex-start}
+.srcnote.bad{color:var(--late-fg)}
+.srcnote b{display:block;font-size:13.5px;margin-bottom:1px;color:inherit}
+@media (max-width:980px){
+  .crow{grid-template-columns:minmax(0,1fr) 32px}
+  .crow .c-time{grid-column:1;grid-row:1}
+  .crow .c-main{grid-column:1;grid-row:2}
+  .crow .tag.join{grid-column:1;grid-row:3;justify-self:start}
+  .crow .open{grid-column:2;grid-row:1}
+}
+
+.skel{display:flex;flex-direction:column;gap:7px}
+.skel .sk{height:46px;border-radius:10px;background:linear-gradient(90deg,var(--sunk) 25%,var(--sunk2) 50%,var(--sunk) 75%);background-size:400% 100%;animation:sh 1.4s ease-in-out infinite}
+@keyframes sh{0%{background-position:100% 0}100%{background-position:0 0}}
+.loading-line{font-size:13px;color:var(--ink3);display:flex;align-items:center;gap:8px}
+
+.foot{border-top:1px solid var(--line);padding-top:14px;font-size:12.5px;color:var(--ink3);display:flex;flex-direction:column;gap:5px}
+.aswitch{display:inline-flex;align-items:center;gap:8px;margin-top:6px;font-size:12.5px;color:var(--ink2);cursor:pointer;user-select:none}
+.aswitch input{width:15px;height:15px;accent-color:var(--accent);margin:0}
+.aswitch .on{color:var(--accent);font-weight:600}
+
+@media (max-width:980px){
+  .cols{grid-template-columns:minmax(0,1fr) 150px 32px;gap:6px 10px;align-items:start}
+  .lhead .h-type,.lhead .h-due,.lhead .h-act{display:none}
+  .row .r-type{grid-column:1;grid-row:2}
+  .row .r-due{grid-column:1;grid-row:3}
+  .row .r-act{grid-column:1;grid-row:4}
+  .row .stcell{grid-row:1;grid-column:2}
+  .row .open{grid-row:1;grid-column:3}
+  .row.nested.lv0{--ind:22px}
+  .row.nested.lv1{--ind:40px}
+  .row.nested.lv2{--ind:58px}
+  .band.grp{padding-left:24px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div>
+      <div class="eyebrow">Wheel &amp; Anchor &middot; Office of the CEO</div>
+      <h1 id="today-title">Gordon's Desk</h1>
+    </div>
+    <div class="mast-right">
+      <div class="sync"><div id="sync-line">reading Monday…</div><div id="sync-sub">Monday &middot; Gmail &middot; Calendar</div></div>
+      <button class="refresh" id="refresh" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg>
+        Refresh</button>
+    </div>
+  </header>
+
+  <div class="strip" id="strip"></div>
+  <div id="notice"></div>
+
+  <nav class="tabs" role="tablist" aria-label="Views" id="tabs"></nav>
+
+  <div class="rail" id="rail" hidden>
+    <label class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="f-search" type="search" placeholder="Search tasks, projects, trips…" autocomplete="off">
+    </label>
+    <span class="fld" id="w-area">Area <select id="f-area"></select></span>
+    <span class="fld" id="w-proj">Project <select id="f-proj"></select></span>
+    <span class="fld" id="w-ceo">CEO status <select id="f-ceo"></select></span>
+    <span class="fld" id="w-due">Due <select id="f-due">
+      <option value="">Any</option>
+      <option value="overdue">Overdue</option>
+      <option value="today">Today</option>
+      <option value="week">Next 7 days</option>
+      <option value="dated">Has a date</option>
+      <option value="none">No date</option>
+    </select></span>
+    <label class="toggle"><input type="checkbox" id="f-nest" checked> Nest by project</label>
+    <button class="clear" id="f-clear" type="button">Reset</button>
+  </div>
+
+  <main id="views"></main>
+
+  <footer class="foot">
+    <span id="foot-1">Read live each time this page opens: every Monday board with a CEO Status column, the Gmail threads under GD To Check, and the calendar for the fortnight ahead.</span>
+    <span>Shows anything assigned to Gordon, or carrying a CEO Status. Finished work moves to Completed. Items at Request for CEO wait for the assistant's triage and are not shown here.</span>
+    <label class="aswitch" title="For the assistant: adds a + Task button on each email that creates the item on Monday"><input type="checkbox" id="assist-toggle"> <span id="assist-label">Assistant tools</span></label>
+  </footer>
+</div>
+
+<script>
+/* ============================ constants ============================ */
+var GORDON_ID = 27166904;                 /* Monday user id for Gordon Dreger */
+var MONDAY = "monday.com", GMAIL = "Gmail", GCAL = "Google Calendar";
+var MAIL = {state:"idle", items:[], err:null, label:"", labelId:"", addr:""};
+var SAMPLE = null, ASK = {}; /* thread id → {state, text} */
+var ASSIST = false; try{ ASSIST = localStorage.getItem("gd-assist") === "1"; }catch(e){}
+var BOARD_EXTRA = {}; /* boardId → {groups:[{id,title}], items:[{id,name,group}]} */
+var GORDON_MAIL = "gordon@wheelandanchor.ca";
+var CAL  = {state:"idle", events:[], err:null};
+var COL = {ceo:"CEO Status", work:"Work Type", who:"Assignee", due:"Due Date",
+           status:"Status", golive:"Go-Live Date", link:"CEO Link", task:"CEO Task", task2:"CEO Text"};
+/* Trip boards carry the trip dates on the trip item, which is usually the parent. */
+var TRIP_TL    = ["Trip Dates","Trip Timeline","Inspection Dates"];
+var TRIP_START = ["Trip Start Date","Start Date"];
+var TRIP_END   = ["Trip End Date","End Date"];
+var TRIP_CODE  = "Trip Code";
+var TRIP_ALL   = TRIP_TL.concat(TRIP_START, TRIP_END, [TRIP_CODE]);
+function hasTripCols(cols){
+  for(var i = 0; i < TRIP_ALL.length; i++){ if(cols[TRIP_ALL[i]]) return true; }
+  return false;
+}
+function tripFrom(get){
+  var tl = "", s = "", e = "", i;
+  for(i = 0; i < TRIP_TL.length && !tl; i++) tl = get(TRIP_TL[i]) || "";
+  if(!tl){
+    for(i = 0; i < TRIP_START.length && !s; i++) s = get(TRIP_START[i]) || "";
+    for(i = 0; i < TRIP_END.length && !e; i++) e = get(TRIP_END[i]) || "";
+  }
+  var range = tl || (s || e ? (s + (e ? " - " + e : "")) : "");
+  return {range: range, code: (get(TRIP_CODE) || "")};
+}
+function fmtRange(r){
+  if(!r) return "";
+  var parts = String(r).split(/\s+-\s+/);
+  var a = parseD(parts[0]), b = parts.length > 1 ? parseD(parts[1]) : null;
+  if(!a) return String(r);
+  var dd = function(x){ return x.getDate(); };
+  if(!b) return dd(a) + " " + MON[a.getMonth()] + " " + a.getFullYear();
+  if(a.getFullYear() === b.getFullYear()){
+    if(a.getMonth() === b.getMonth()) return dd(a) + "\u2013" + dd(b) + " " + MON[a.getMonth()] + " " + a.getFullYear();
+    return dd(a) + " " + MON[a.getMonth()] + " \u2013 " + dd(b) + " " + MON[b.getMonth()] + " " + b.getFullYear();
+  }
+  return dd(a) + " " + MON[a.getMonth()] + " " + a.getFullYear() + " \u2013 " + dd(b) + " " + MON[b.getMonth()] + " " + b.getFullYear();
+}
+var CEO_META = {
+  "Ready for CEO":    {cls:"v-ready",   rank:1},
+  "Needs Info":       {cls:"v-info",    rank:2},
+  "CEO Working On It":{cls:"v-working", rank:0},
+  "Request for CEO":  {cls:"v-req",     rank:3},
+  "CEO Done":         {cls:"v-done",    rank:5},
+  "Closed":           {cls:"v-closed",  rank:6},
+  "Not for CEO":      {cls:"v-none",    rank:7},
+  "":                 {cls:"v-none",    rank:4, label:"No CEO status"}
+};
+var CEO_CHOICES = ["Ready for CEO","CEO Working On It","Needs Info","CEO Done","Closed","Not for CEO","Request for CEO",""];
+var HIDE_FROM_GORDON = {"Closed":1,"Not for CEO":1,"Request for CEO":1,"CEO Done":1};
+var WORK_TYPES = ["Action","Project","Open File","Idea"];
+/* Monday calls them Actions; on this page they are Tasks. */
+var WORK_LABEL = {"Action":"Task","Project":"Project","Open File":"Open file","Idea":"Idea"};
+var WORK_PLURAL = {"Action":"tasks","Project":"projects","Open File":"open files","Idea":"ideas"};
+
+/* ============================ helpers ============================ */
+var el = function(id){ return document.getElementById(id); };
+var esc = function(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(m){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]; }); };
+
+var now = new Date();
+var TODAY = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+var DOW = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+var MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function parseD(s){ if(!s) return null; var p = String(s).slice(0,10).split("-"); if(p.length<3) return null;
+  var d = new Date(+p[0], +p[1]-1, +p[2]); return isNaN(d) ? null : d; }
+function days(s){ var d = parseD(s); return d === null ? null : Math.round((d - TODAY)/86400000); }
+function shortD(s){ var d = parseD(s); return d ? MON[d.getMonth()]+" "+d.getDate() : ""; }
+el("today-title").textContent = DOW[now.getDay()]+", "+now.getDate()+" "+MON[now.getMonth()];
+
+/* ============================ state ============================ */
+var MCP = null, LOADED = false, LOADING = false, LOAD_ERR = null, PERMS = null, PERM_STATE = "";
+var ITEMS = [], BY_ID = {}, KIDS = {}, AREAS = [], BOARD_META = {}, ALL_BOARDS = {}, PARENT_TRIP = {};
+var current = "today", collapsed = {}, sortBy = "due", sortDir = 1;
+var F = {search:"", area:"", proj:"", ceo:"", due:"", nest:true};
+
+try {
+  var saved = JSON.parse(localStorage.getItem("gd-state") || "null");
+  if(saved){ if(saved.F) for(var k in saved.F) if(k in F) F[k] = saved.F[k];
+    current = saved.current || current; sortBy = saved.sortBy || sortBy;
+    sortDir = saved.sortDir || sortDir; collapsed = saved.collapsed || {}; }
+} catch(e){}
+function save(){ try{ localStorage.setItem("gd-state",
+  JSON.stringify({F:F, current:current, sortBy:sortBy, sortDir:sortDir, collapsed:collapsed})); }catch(e){} }
+
+/* ============================ monday ============================ */
+function gql(query, vars){
+  var input = {query: query}; if(vars) input.variables = JSON.stringify(vars);
+  return MCP.callTool(MONDAY, "all_monday_api", input, {cache:false})
+    .then(function(r){
+      var p = r && r.payload;
+      if(typeof p === "string"){ try{ p = JSON.parse(p); }catch(e){} }
+      if(p && p.data) return p.data;
+      if(p && p.errors) throw {code:"tool_error", message: (p.errors[0] && p.errors[0].message) || "Monday rejected the query"};
+      return p;
+    });
+}
+function mcpMessage(code, message, server){
+  var s = server || "monday.com";
+  switch(code){
+    case "needs_reauth": return {t:s + " needs reconnecting", m:"Open Settings → Connectors in Claude and reconnect " + s + ", then refresh."};
+    case "server_not_connected": return {t:s + " isn't connected", m:"Add the " + s + " connector in Claude under Settings → Connectors, then refresh this page."};
+    case "selection_required": return {t:"Choose a " + s + " account", m:"You have more than one " + s + " connector. Pick one in Claude, then refresh."};
+    case "not_in_manifest":
+    case "not_granted": return {t:"This page isn't allowed to read " + s, m:"Allow the " + s + " connector for this page when Claude asks, then refresh."};
+    case "blocked_by_policy": return {t:"Blocked by your organisation", m:"Your " + s + " connector is blocked by policy for this page."};
+    case "approval_required": return {t:"Approval needed", m:"Approve the " + s + " prompt in Claude, then refresh."};
+    case "rate_limited": return {t:"Too many requests", m:"Wait a few seconds and refresh."};
+    case "server_unavailable":
+    case "upstream_error": return {t:s + " didn't answer", m:"It may be a brief outage. Try Refresh in a moment."};
+    case "cancelled": return {t:"Cancelled", m:"The request was cancelled before it finished."};
+    case "no_label": return {t:"No “GD To Check” label", m:"Create a Gmail label called GD To Check and put the emails Gordon needs to see under it."};
+    case "mcp_denied": return {t:"Connectors were declined for this page", m:"Open this page's Permissions (the menu next to the title) and allow monday.com, Gmail and Google Calendar, then refresh."};
+    case "mcp_unavailable": return {t:"This account can't use connectors on this page", m:"Claude did not offer the connectors to this viewer. Usually this means the account opening the page is outside the organisation that owns it, or the Claude plan here does not allow connectors inside shared pages."};
+    default: return {t:"Couldn't read " + s, m: message || "Something went wrong talking to " + s + "."};
+  }
+}
+function payloadOf(r){ var p = r && r.payload; if(typeof p === "string"){ try{ p = JSON.parse(p); }catch(e){} } return p || {}; }
+function unesc(s){ var t = document.createElement("textarea"); t.innerHTML = String(s == null ? "" : s); return t.value; }
+function pad2(n){ return String(n).padStart(2, "0"); }
+function isoLocal(d){ return d.getFullYear() + "-" + pad2(d.getMonth()+1) + "-" + pad2(d.getDate()) + "T00:00:00"; }
+function addDays(d, n){ var x = new Date(d); x.setDate(x.getDate() + n); return x; }
+function sameDay(a, b){ return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
+function hhmm(d){ return pad2(d.getHours()) + ":" + pad2(d.getMinutes()); }
+function whenLabel(iso){
+  var d = new Date(iso); if(isNaN(d)) return "";
+  var n = Math.round((new Date(d.getFullYear(), d.getMonth(), d.getDate()) - TODAY) / 86400000);
+  if(n === 0) return "today " + hhmm(d);
+  if(n === -1) return "yesterday";
+  if(n > -7 && n < 0) return DOW[d.getDay()];
+  return MON[d.getMonth()] + " " + d.getDate();
+}
+
+/* ---------- Gmail: the GD To Check label ---------- */
+function loadMail(){
+  if(!MCP){ MAIL = {state:"off", items:[], err:null, label:"", labelId:""}; return Promise.resolve(); }
+  MAIL = {state:"loading", items:[], err:null, label:"", labelId:""};
+  return MCP.callTool(GMAIL, "list_labels", {}, {cache:false})
+    .then(function(r){
+      var labels = payloadOf(r).labels || [];
+      var hit = labels.filter(function(l){ return /gd\s*to\s*check/i.test(l.name || ""); })[0];
+      if(!hit) throw {code:"no_label"};
+      MAIL.label = hit.name; MAIL.labelId = hit.labelId;
+      return MCP.callTool(GMAIL, "search_threads",
+        {query:'label:"' + hit.name + '"', pageSize:50, view:"THREAD_VIEW_MINIMAL"}, {cache:false});
+    })
+    .then(function(r){
+      var threads = payloadOf(r).threads || [];
+      threads.some(function(t){ var m = /authuser=([^#&]+)/.exec(t.viewUrl || ""); if(m){ MAIL.addr = decodeURIComponent(m[1]); return true; } });
+      MAIL.items = threads.map(function(t){
+        var msgs = t.messages || [];
+        var tagged = msgs.filter(function(m){ return (m.labelIds || []).indexOf(MAIL.labelId) !== -1; });
+        var m = tagged.length ? tagged[tagged.length - 1] : (msgs[msgs.length - 1] || {});
+        var subj = m.subject || (msgs[0] && msgs[0].subject) || "(no subject)";
+        return { id:t.id, subject:unesc(subj), from:m.sender || "", date:m.date || "",
+                 snippet:unesc(m.snippet || ""), url:m.viewUrl || t.viewUrl || "#", count:t.messageCount || msgs.length };
+      }).sort(function(a,b){ return String(b.date).localeCompare(String(a.date)); });
+      MAIL.state = "ok";
+    })
+    .catch(function(err){ MAIL.state = "error"; MAIL.err = err; })
+    .then(function(){ if(LOADED) render(); });
+}
+
+/* ---------- Google Calendar: today + the next fortnight ---------- */
+function loadCal(){
+  if(!MCP){ CAL = {state:"off", events:[], err:null}; return Promise.resolve(); }
+  CAL = {state:"loading", events:[], err:null};
+  return MCP.callTool(GCAL, "list_events",
+      {startTime:isoLocal(TODAY), endTime:isoLocal(addDays(TODAY, 15)), orderBy:"startTime", pageSize:250}, {cache:false})
+    .then(function(r){
+      var evs = payloadOf(r).events || [];
+      CAL.events = evs.filter(function(e){
+        if(e.status === "cancelled") return false;
+        var me = (e.attendees || []).filter(function(a){ return a.self; })[0];
+        return !(me && me.responseStatus === "declined");
+      }).map(function(e){
+        var allDay = !!(e.start && e.start.date);
+        var s = allDay ? parseD(e.start.date) : new Date(e.start && e.start.dateTime);
+        var en = allDay ? parseD(e.end && e.end.date) : new Date(e.end && e.end.dateTime);
+        var who = (e.attendees || []).filter(function(a){ return !a.self; }).map(function(a){ return a.displayName || a.email; });
+        return { id:e.id, title:e.summary || "(untitled)", allDay:allDay, start:s, end:en,
+                 join:e.conferenceUrl || "", url:e.htmlLink || "", who:who, where:e.location || "" };
+      }).filter(function(e){ return e.start && !isNaN(e.start); })
+        .sort(function(a,b){ return a.start - b.start; });
+      CAL.state = "ok";
+    })
+    .catch(function(err){ CAL.state = "error"; CAL.err = err; })
+    .then(function(){ if(LOADED) render(); });
+}
+
+function discoverBoards(){
+  return gql('query { boards(limit:500, state:active) { id name columns { id title type } } }')
+    .then(function(d){
+      var out = [];
+      ALL_BOARDS = {};
+      (d.boards || []).forEach(function(b){
+        var map = {}, seen = {};
+        (b.columns || []).forEach(function(c){ if(!seen[c.title]){ seen[c.title] = 1; map[c.title] = c.id; } });
+        ALL_BOARDS[b.id] = {id:b.id, name:b.name, cols:map};
+        if(!map[COL.ceo]) return;
+        out.push({ id:b.id, name:b.name, isSub: /^Subitems of /.test(b.name),
+          area: b.name.replace(/^Subitems of /, ""), cols:map });
+      });
+      return out;
+    });
+}
+
+function boardQuery(b){
+  var ids = [], want = [COL.ceo, COL.work, COL.who, COL.due, COL.status, COL.golive, COL.link, COL.task, COL.task2].concat(TRIP_ALL);
+  want.forEach(function(t){ if(b.cols[t] && ids.indexOf(b.cols[t]) === -1) ids.push(b.cols[t]); });
+  var idList = ids.map(function(i){ return '"' + i + '"'; }).join(",");
+  var rules = '{column_id:"' + b.cols[COL.ceo] + '", compare_value:[], operator:is_not_empty}';
+  if(b.cols[COL.who]) rules += ',{column_id:"' + b.cols[COL.who] + '", compare_value:["person-' + GORDON_ID + '"], operator:any_of}';
+  return 'query { boards(ids:[' + b.id + ']) { id name items_page(limit:300, query_params:{rules:[' + rules + '], operator:or}) {' +
+         ' items { id name url updated_at group { title } parent_item { id name group { title } board { id } }' +
+         ' column_values(ids:[' + idList + ']) { id text ... on MirrorValue { display_value } } } } } }';
+}
+
+function loadBoard(b){
+  return gql(boardQuery(b)).then(function(d){
+    var board = (d.boards || [])[0];
+    if(!board) return [];
+    return (board.items_page && board.items_page.items || []).map(function(it){
+      var cv = {};
+      (it.column_values || []).forEach(function(c){ cv[c.id] = c.text || c.display_value || ""; });
+      var get = function(title){ var id = b.cols[title]; return id ? (cv[id] || "") : ""; };
+      var parent = it.parent_item;
+      return {
+        id: it.id, name: it.name, url: it.url, updated: it.updated_at,
+        boardId: b.id, boardName: b.name, area: b.area, isSub: b.isSub,
+        group: b.isSub ? (parent && parent.group ? parent.group.title : "") : (it.group ? it.group.title : ""),
+        parentId: parent ? parent.id : "", parentName: parent ? parent.name : "",
+        parentBoard: parent && parent.board ? parent.board.id : "",
+        trip: tripFrom(get),
+        ceo: get(COL.ceo), work: get(COL.work), who: get(COL.who), due: get(COL.due),
+        status: get(COL.status), golive: get(COL.golive), link: get(COL.link),
+        task: get(COL.task) || get(COL.task2),
+        ceoCol: b.cols[COL.ceo]
+      };
+    });
+  }).catch(function(err){
+    return {__err:true, board:b.name, code: err && err.code, message: err && err.message};
+  });
+}
+
+function chunkRun(list, size, fn){
+  var out = [], i = 0;
+  function next(){
+    if(i >= list.length) return Promise.resolve(out);
+    var slice = list.slice(i, i + size); i += size;
+    return Promise.all(slice.map(fn)).then(function(res){ out = out.concat(res); return next(); });
+  }
+  return next();
+}
+
+function load(){
+  if(LOADING) return;
+  LOADING = true; LOAD_ERR = null;
+  el("refresh").disabled = true;
+  el("refresh").querySelector("svg").classList.add("spin");
+  el("sync-line").textContent = "reading Monday…";
+  el("sync-sub").textContent = "";
+  render();
+
+  loadMail(); loadCal();
+  return Promise.resolve()
+    .then(function(){ if(!MCP) throw {code: PERM_STATE === "unavailable" ? "mcp_unavailable" : PERM_STATE === "denied" ? "mcp_denied" : "not_granted"}; return discoverBoards(); })
+    .then(function(boards){
+      BOARD_META = {}; AREAS = [];
+      boards.forEach(function(b){ BOARD_META[b.id] = b; if(AREAS.indexOf(b.area) === -1) AREAS.push(b.area); });
+      AREAS.sort();
+      el("sync-line").textContent = "reading " + boards.length + " boards…";
+      return chunkRun(boards, 6, loadBoard);
+    })
+    .then(function(results){
+      var items = [], errs = [];
+      results.forEach(function(r){ if(r && r.__err) errs.push(r); else items = items.concat(r); });
+      ITEMS = items;
+      return loadParentTrips().then(function(){ return errs; });
+    })
+    .then(function(errs){
+      ITEMS.forEach(function(d){
+        if(!d.trip.range && d.parentId && PARENT_TRIP[d.parentId]) d.trip = PARENT_TRIP[d.parentId];
+      });
+      indexItems();
+      LOADED = true; LOADING = false;
+      LOAD_ERR = errs.length ? {partial:true, boards:errs} : null;
+      var t = new Date();
+      el("sync-line").innerHTML = "Monday &middot; <b>live</b>";
+      el("sync-sub").textContent = "Monday · Gmail · Calendar · read at " + String(t.getHours()).padStart(2,"0") + ":" + String(t.getMinutes()).padStart(2,"0");
+      el("refresh").disabled = false;
+      el("refresh").querySelector("svg").classList.remove("spin");
+      fillRail(); render();
+    })
+    .catch(function(err){
+      LOADING = false; LOADED = false;
+      LOAD_ERR = {fatal:true, code: err && err.code, message: err && err.message};
+      el("sync-line").textContent = "not connected";
+      el("sync-sub").textContent = "";
+      el("refresh").disabled = false;
+      el("refresh").querySelector("svg").classList.remove("spin");
+      render();
+    });
+}
+
+/* The trip dates sit on the trip item, which is usually a parent we did not fetch. */
+function loadParentTrips(){
+  PARENT_TRIP = {};
+  var have = {};
+  ITEMS.forEach(function(d){ have[d.id] = 1; });
+  var byBoard = {};
+  ITEMS.forEach(function(d){
+    if(!d.parentId || !d.parentBoard || have[d.parentId]) return;
+    var b = ALL_BOARDS[d.parentBoard];
+    if(!b || !hasTripCols(b.cols)) return;
+    (byBoard[d.parentBoard] = byBoard[d.parentBoard] || {})[d.parentId] = 1;
+  });
+  var jobs = Object.keys(byBoard).map(function(bid){
+    var b = ALL_BOARDS[bid], ids = [], seen = {};
+    TRIP_ALL.forEach(function(t){ var c = b.cols[t]; if(c && !seen[c]){ seen[c] = 1; ids.push(c); } });
+    var itemIds = Object.keys(byBoard[bid]).slice(0, 100);
+    if(!ids.length || !itemIds.length) return Promise.resolve();
+    var q = "query { items(ids:[" + itemIds.join(",") + "]) { id name column_values(ids:[" +
+      ids.map(function(i){ return '"' + i + '"'; }).join(",") +
+      "]) { id text ... on MirrorValue { display_value } } } }";
+    return gql(q).then(function(res){
+      (res.items || []).forEach(function(it){
+        var cv = {};
+        (it.column_values || []).forEach(function(c){ cv[c.id] = c.text || c.display_value || ""; });
+        var get = function(title){ var id = b.cols[title]; return id ? (cv[id] || "") : ""; };
+        var t = tripFrom(get);
+        if(t.range || t.code) PARENT_TRIP[it.id] = t;
+      });
+    }).catch(function(){ /* trip dates are a nicety — never fail the load over them */ });
+  });
+  return Promise.all(jobs);
+}
+function indexItems(){
+  BY_ID = {}; KIDS = {};
+  ITEMS.forEach(function(d){ BY_ID[d.id] = d; });
+  ITEMS.forEach(function(d){ if(d.parentId){ (KIDS[d.parentId] = KIDS[d.parentId] || []).push(d); } });
+}
+function isProject(d){ return d.work === "Project" || (KIDS[d.id] && KIDS[d.id].length > 0); }
+function mineNow(d){ return !HIDE_FROM_GORDON[d.ceo]; }
+
+/* ============================ filtering ============================ */
+function matches(d){
+  if(!mineNow(d)) return false;
+  if(F.area && d.area !== F.area) return false;
+  if(F.proj && d.parentId !== F.proj && d.id !== F.proj) return false;
+  if(F.ceo){ var want = F.ceo === "__none" ? "" : F.ceo; if(d.ceo !== want) return false; }
+  if(F.due){
+    var n = days(d.due);
+    if(F.due === "none" && n !== null) return false;
+    if(F.due === "dated" && n === null) return false;
+    if(F.due === "overdue" && !(n !== null && n < 0)) return false;
+    if(F.due === "today" && n !== 0) return false;
+    if(F.due === "week" && !(n !== null && n >= 0 && n <= 7)) return false;
+  }
+  if(F.search){
+    var q = F.search.toLowerCase();
+    var hay = [d.name, d.group, d.parentName, d.area, d.ceo, d.status, d.work, d.task].join(" ").toLowerCase();
+    if(hay.indexOf(q) === -1) return false;
+  }
+  return true;
+}
+function visible(){ return ITEMS.filter(matches); }
+function actions(){ return visible().filter(function(d){ return d.work === "Action"; }); }
+
+/* ============================ sorting ============================ */
+function cmp(a, b){
+  var A = a.d || a.cont, B = b.d || b.cont, r = 0;
+  if(sortBy === "due"){
+    var x = A.due ? days(A.due) : null, y = B.due ? days(B.due) : null;
+    if(x === null && y === null) r = 0;
+    else if(x === null) return 1;
+    else if(y === null) return -1;
+    else r = x - y;
+  } else if(sortBy === "title"){ r = String(A.name).localeCompare(String(B.name)); }
+  else if(sortBy === "ceo"){ r = (a.d ? CEO_META[a.d.ceo].rank : 9) - (b.d ? CEO_META[b.d.ceo].rank : 9); }
+  else if(sortBy === "type"){
+    var ord = {"Action":0,"Project":1,"Open File":2,"Idea":3};
+    r = (ord[A.work] === undefined ? 9 : ord[A.work]) - (ord[B.work] === undefined ? 9 : ord[B.work]);
+  }
+  if(r === 0) r = String(A.name).localeCompare(String(B.name));
+  return r * sortDir;
+}
+
+/* ============================ rows ============================ */
+function areaClass(area){
+  var i = AREAS.indexOf(area); if(i < 0) i = 0;
+  return "k" + ((i % 10) + 1);
+}
+function areaStyle(area){
+  var c = areaClass(area);
+  return "background:var(--" + c + ");color:var(--" + c + "f)";
+}
+function dueCell(d){
+  var n = days(d.due);
+  if(n === null) return '<span class="due never">no date</span>';
+  if(n < 0) return '<span class="due late">' + shortD(d.due) + ' &middot; ' + Math.abs(n) + 'd late</span>';
+  if(n === 0) return '<span class="due now">today</span>';
+  if(n === 1) return '<span class="due">tomorrow</span>';
+  return '<span class="due">' + shortD(d.due) + '</span>';
+}
+function statusSelect(d){
+  var meta = CEO_META[d.ceo] || CEO_META[""];
+  var opts = CEO_CHOICES.map(function(v){
+    return '<option value="' + esc(v) + '"' + (v === d.ceo ? " selected" : "") + '>' + esc(v || "— no CEO status —") + '</option>';
+  }).join("");
+  return '<div class="stcell"><select class="stsel ' + meta.cls + '" data-item="' + d.id + '" data-board="' + d.boardId +
+    '" data-col="' + d.ceoCol + '" aria-label="CEO status for ' + esc(d.name) + '">' + opts + '</select>' +
+    '<span class="stmsg" data-msg="' + d.id + '"></span></div>';
+}
+function row(n, depth, opts){
+  opts = opts || {};
+  var d = n.d, cont = n.cont, o = d || cont;
+  var proj = d ? isProject(d) : true;
+  var hasKids = n.kids && n.kids.length > 0;
+  var open = !collapsed[n.id];
+  var cls = ["row","cols"];
+  if(opts.nested){ cls.push("nested"); cls.push("lv" + Math.min(depth, 2)); }
+  if(proj) cls.push("proj");
+  if(!d) cls.push("ctx");
+  if(d && (d.ceo === "CEO Done" || d.ceo === "Closed" || d.status === "Done")) cls.push("dim");
+
+  var bits = [];
+  if(opts.showArea) bits.push('<span class="chip" style="' + areaStyle(o.area) + '">' + esc(o.area) + '</span>');
+  if(opts.showGroup && o.group) bits.push("<span>" + esc(o.group) + "</span>");
+  if(opts.showPath && d && d.parentName) bits.push("<span>in " + esc(d.parentName) + "</span>");
+  var trip = d ? d.trip : (cont ? cont.trip : null);
+  if(trip && (trip.range || trip.code)){
+    bits.push('<span class="tag trip">' +
+      (trip.range ? esc(fmtRange(trip.range)) : "") +
+      (trip.range && trip.code ? " &middot; " : "") +
+      (trip.code ? esc(trip.code) : "") + "</span>");
+  }
+  if(!d) bits.push("<span>" + n.kids.length + " of his " + (n.kids.length === 1 ? "task" : "tasks") + " sit here</span>");
+  if(d && d.golive) bits.push("<span>go-live " + shortD(d.golive) + "</span>");
+  if(d && d.status && d.status !== "Not Actioned Yet") bits.push("<span>" + esc(d.status) + "</span>");
+  if(d && d.task) bits.push("<span>&ldquo;" + esc(d.task) + "&rdquo;</span>");
+  if(d && d.work === "Action" && !d.due) bits.push('<span class="tag warnflag">needs a date</span>');
+  if(d && d.link) bits.push('<a class="tag" href="' + esc(d.link) + '" target="_blank" rel="noopener">reference &nearr;</a>');
+
+  var canDone = d && d.ceo !== "CEO Done" && d.ceo !== "Closed" && d.ceo !== "Not for CEO";
+  return '<div class="' + cls.join(" ") + '">' +
+    '<div class="r-main"><div class="r-top">' +
+      (hasKids ? '<button class="caret' + (open ? " open" : "") + '" type="button" data-node="' + n.id + '" aria-expanded="' + open + '" aria-label="Toggle subitems">&#9656;</button>' : "") +
+      '<span class="r-title">' + esc(o.name) + "</span></div>" +
+      (bits.length ? '<div class="r-sub">' + bits.join('<span class="sep">&middot;</span>') + "</div>" : "") +
+    "</div>" +
+    '<div class="r-type"><span class="type t-' + String(o.work || "").replace(/\s/g,"") + '">' + esc(WORK_LABEL[o.work] || (d ? "—" : "parent")) + "</span></div>" +
+    (d ? statusSelect(d) : '<div class="stcell"><span class="stpill v-none">not his item</span></div>') +
+    '<div class="r-due">' + (d ? dueCell(d) : "") + "</div>" +
+    '<div class="r-act">' + (canDone ? '<button class="donebtn" type="button" data-done="' + d.id + '">Done</button>' : "") + "</div>" +
+    '<a class="open" href="' + esc(o.url || "#") + '" target="_blank" rel="noopener" title="Open in Monday" aria-label="Open in Monday">' +
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg></a>' +
+    "</div>";
+}
+var SORTS = [["title","Task"],["type","Kind"],["ceo","CEO status"],["due","Due"]];
+function head(){
+  return '<div class="lhead cols">' +
+    SORTS.map(function(s, i){
+      var cls = (sortBy === s[0] ? "on" : "") + (i === 1 ? " h-type" : "") + (i === 3 ? " h-due" : "");
+      return '<button type="button" class="' + cls + '" data-sort="' + s[0] + '">' + s[1] +
+        (sortBy === s[0] ? '<span class="arrow">' + (sortDir === 1 ? "▲" : "▼") + "</span>" : "") + "</button>";
+    }).join("") + '<span class="h-act"></span><span></span></div>';
+}
+function flatList(items, emptyMsg, opts){
+  if(!items.length) return '<div class="list"><div class="empty">' + emptyMsg + "</div></div>";
+  var nodes = items.map(function(d){ return {id:d.id, d:d, cont:null, kids:[]}; }).sort(cmp);
+  return '<div class="list">' + head() + nodes.map(function(n){
+    return row(n, 0, Object.assign({showArea:true, showGroup:true, showPath:true}, opts || {}));
+  }).join("") + "</div>";
+}
+function sec(title, count, hint, body){
+  return '<div class="sec"><div class="sec-h"><h2>' + title + "</h2>" +
+    (count !== null ? '<span class="count">' + count + "</span>" : "") +
+    (hint ? '<span class="hint">' + hint + "</span>" : "") + "</div>" + body + "</div>";
+}
+
+/* tree for nested views */
+function buildTree(items){
+  var nodes = {}, seen = {};
+  function ensure(id){
+    if(!nodes[id]) nodes[id] = {id:id, d:BY_ID[id] || null, cont:null, kids:[], match:false};
+    return nodes[id];
+  }
+  items.forEach(function(d){ ensure(d.id).match = true; });
+  var queue = items.map(function(d){ return d.id; });
+  while(queue.length){
+    var id = queue.shift();
+    if(seen[id]) continue;
+    seen[id] = true;
+    var n = ensure(id), d = n.d;
+    var pid = d ? d.parentId : "";
+    if(pid){
+      var p = ensure(pid);
+      if(!p.d){ var kid = BY_ID[id];
+        p.cont = {id:pid, name: kid ? kid.parentName : "Parent item", area: kid ? kid.area : "", group: kid ? kid.group : "",
+                  url: kid ? kid.url.replace(/pulses\/\d+$/, "pulses/" + pid) : "#", work:"",
+                  trip: PARENT_TRIP[pid] || (kid ? kid.trip : null)}; }
+      if(p.kids.indexOf(n) === -1) p.kids.push(n);
+      queue.push(pid);
+    }
+  }
+  return Object.keys(nodes).map(function(k){ return nodes[k]; }).filter(function(n){
+    return !(n.d && n.d.parentId);
+  });
+}
+function countLeaves(n){ return (n.match ? 1 : 0) + n.kids.reduce(function(s,k){ return s + countLeaves(k); }, 0); }
+function renderNode(n, depth, opts){
+  var html = row(n, depth, opts);
+  if(n.kids.length && !collapsed[n.id]){
+    html += n.kids.slice().sort(cmp).map(function(k){
+      return renderNode(k, depth + 1, Object.assign({}, opts, {showPath:false, showArea:false, showGroup:false}));
+    }).join("");
+  }
+  return html;
+}
+function nestedByArea(items, emptyMsg){
+  if(!items.length) return '<div class="list"><div class="empty">' + emptyMsg + "</div></div>";
+  var roots = buildTree(items), byArea = {};
+  roots.forEach(function(n){ var a = (n.d || n.cont).area || "—"; (byArea[a] = byArea[a] || []).push(n); });
+  var order = Object.keys(byArea).sort();
+  return '<div class="list">' + order.map(function(a){
+    var open = !collapsed["area:" + a];
+    var total = byArea[a].reduce(function(s,n){ return s + countLeaves(n); }, 0);
+    var out = '<button class="band area" type="button" data-node="area:' + esc(a) + '" aria-expanded="' + open + '">' +
+      '<span class="caret' + (open ? " open" : "") + '">&#9656;</span><span class="bname">' + esc(a) +
+      '</span><span class="count">' + total + "</span></button>";
+    if(!open) return out;
+    var byGrp = {};
+    byArea[a].forEach(function(n){ var g = (n.d || n.cont).group || "—"; (byGrp[g] = byGrp[g] || []).push(n); });
+    Object.keys(byGrp).sort().forEach(function(g){
+      var gk = "grp:" + a + ":" + g, gOpen = !collapsed[gk];
+      var gTotal = byGrp[g].reduce(function(s,n){ return s + countLeaves(n); }, 0);
+      out += '<button class="band grp" type="button" data-node="' + esc(gk) + '" aria-expanded="' + gOpen + '">' +
+        '<span class="caret' + (gOpen ? " open" : "") + '">&#9656;</span><span class="bname">' + esc(g) +
+        '</span><span class="count">' + gTotal + "</span></button>";
+      if(gOpen) out += byGrp[g].slice().sort(cmp).map(function(n){ return renderNode(n, 0, {nested:true}); }).join("");
+    });
+    return out;
+  }).join("") + "</div>";
+}
+
+/* ============================ source panels ============================ */
+var OPEN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>';
+function skelList(n){ var s = ""; for(var i = 0; i < n; i++) s += '<div class="sk" style="height:44px;border-radius:0"></div>'; return '<div class="list"><div class="skel" style="gap:0">' + s + "</div></div>"; }
+function srcState(src, server, label){
+  if(src.state === "idle" || src.state === "loading") return skelList(2);
+  if(src.state === "off") return '<div class="list"><div class="srcnote"><b>' + esc(server) + ' not connected</b>Connect it in Claude and this fills in.</div></div>';
+  if(src.state === "error"){
+    var m = mcpMessage(src.err && src.err.code, src.err && src.err.message, server);
+    return '<div class="list"><div class="srcnote bad"><div><b>' + esc(m.t) + "</b>" + esc(m.m) + "</div></div></div>";
+  }
+  return null;
+}
+function askPanel(a){
+  if(!a || (a.state === "ok" && !a.open)) return "";
+  if(a.state === "loading") return '<div class="m-ask"><div class="box think">' + esc(a.text || "Reading the thread…") + "</div></div>";
+  if(a.state === "error") return '<div class="m-ask"><div class="box bad">' + esc(a.text) + "</div></div>";
+  var t = esc(a.text).replace(/^(What this is about|What.s needed from you|Nothing needed from you)[:.]?\s*$/gim, "<b>$1</b>")
+                     .replace(/^\*\*(.+?)\*\*:?\s*$/gm, "<b>$1</b>").replace(/\*\*/g, "");
+  return '<div class="m-ask"><div class="box">' + t + "</div></div>";
+}
+function cleanBody(s){
+  return String(s || "").split("\n").filter(function(l){ return !/^\s*>/.test(l); }).join("\n")
+    .replace(/\n{3,}/g, "\n\n").replace(/\[image:[^\]]*\]/g, "").trim().slice(0, 6000);
+}
+function askMail(id){
+  var m = MAIL.items.filter(function(x){ return x.id === id; })[0];
+  if(!m || !SAMPLE || !MCP) return;
+  var a = ASK[id];
+  if(a && a.state === "ok"){ a.open = !a.open; render(); return; }
+  if(a && a.state === "loading") return;
+  ASK[id] = {state:"loading", text:"Reading the thread…", open:true}; render();
+  MCP.callTool(GMAIL, "get_thread", {threadId:id, messageFormat:"PLAIN_TEXT"}, {cache:false})
+    .then(function(r){
+      var msgs = (payloadOf(r).messages || []).slice(-8);
+      var who = MAIL.addr || GORDON_MAIL;
+      var body = msgs.map(function(x){
+        return "From: " + (x.sender || "") + "\nTo: " + ((x.toRecipients || []).join(", ")) + "\nDate: " + (x.date || "") +
+               "\nSubject: " + (x.subject || "") + "\n\n" + cleanBody(x.plaintextBody || x.snippet);
+      }).join("\n\n-----\n\n");
+      var prompt = "You are briefing Gordon Dreger, founder and CEO of Wheel & Anchor (a group-travel company), whose address is " + who +
+        ". His assistant flagged the email thread below for him to check. Messages are oldest first; quoted replies were removed.\n\n" +
+        "Write for Gordon, plain English, no preamble, under 130 words, exactly two parts with these headings on their own lines:\n" +
+        "What this is about\n(two or three sentences: who, what, where it stands)\n\n" +
+        "What's needed from you\n(the specific decision, reply or action Gordon has to take; who is waiting; any deadline or amount. " +
+        "If Gordon already answered and nothing is pending for him, say 'Nothing needed from you right now' and why.)\n\n" +
+        "Plain text only, no markdown.\n\n=== THREAD ===\n" + body;
+      ASK[id].text = "Thinking…"; render();
+      return SAMPLE(prompt, {modelTier:"quick", onText:function(t){ ASK[id].text = t.text; render(); }});
+    })
+    .then(function(res){ ASK[id] = {state:"ok", text:res.text, open:true}; render(); })
+    .catch(function(e){
+      var code = e && e.code, msg;
+      if(code === "not_granted") msg = "Claude wasn't allowed for this page. Allow it when asked, then try again.";
+      else if(code === "rate_limited") msg = "Claude is busy — give it a moment and try again.";
+      else if(code === "cancelled") msg = "Stopped.";
+      else if(code && mcpMessage(code, e.message, GMAIL)) { var mm = mcpMessage(code, e.message, GMAIL); msg = mm.t + " " + mm.m; }
+      else msg = "Couldn't summarise this thread. Open it in Gmail instead.";
+      ASK[id] = {state:"error", text:msg, open:true}; render();
+    });
+}
+/* ---------- + Task: create a Monday item from an email (assistant only) ---------- */
+var FORM = null;
+function parentBoards(){
+  return Object.keys(ALL_BOARDS).map(function(k){ return ALL_BOARDS[k]; })
+    .filter(function(b){ return b.cols[COL.ceo] && !/^Subitems of /.test(b.name); })
+    .sort(function(a,b){ return a.name.localeCompare(b.name); });
+}
+function subBoardOf(b){
+  var want = "Subitems of " + b.name;
+  return Object.keys(ALL_BOARDS).map(function(k){ return ALL_BOARDS[k]; }).filter(function(x){ return x.name === want; })[0] || null;
+}
+function boardExtra(id){
+  if(BOARD_EXTRA[id]) return Promise.resolve(BOARD_EXTRA[id]);
+  var b0 = ALL_BOARDS[id] || {cols:{}}, ids = [], seen = {};
+  TRIP_ALL.forEach(function(t){ var c = b0.cols[t]; if(c && !seen[c]){ seen[c] = 1; ids.push(c); } });
+  var cvq = ids.length ? ' column_values(ids:[' + ids.map(function(i){ return '"' + i + '"'; }).join(",") + ']) { id text ... on MirrorValue { display_value } }' : "";
+  return gql('query { boards(ids:[' + id + ']) { groups { id title } items_page(limit:300) { items { id name group { id }' + cvq + ' } } } }')
+    .then(function(d){
+      var b = (d.boards || [])[0] || {};
+      BOARD_EXTRA[id] = { groups: b.groups || [],
+        items: ((b.items_page && b.items_page.items) || []).map(function(i){
+          var cv = {}; (i.column_values || []).forEach(function(c){ cv[c.id] = c.text || c.display_value || ""; });
+          var t = ids.length ? tripFrom(function(title){ var cid = b0.cols[title]; return cid ? (cv[cid] || "") : ""; }) : {range:"", code:""};
+          var label = i.name + (t.range ? "  ·  " + fmtRange(t.range) : "") + (t.code ? "  ·  " + t.code : "");
+          return {id:i.id, name:i.name, label:label, group:i.group && i.group.id, sort:(t.range ? String(t.range).slice(0,10) : "9999")};
+        }) };
+      if(ids.length) BOARD_EXTRA[id].items.sort(function(a,b){ return a.sort < b.sort ? -1 : a.sort > b.sort ? 1 : 0; });
+      return BOARD_EXTRA[id];
+    });
+}
+function cleanSubject(s){ return String(s || "").replace(/^\s*((re|fwd?|fw)\s*:\s*)+/i, "").trim(); }
+function openForm(threadId){
+  var m = MAIL.items.filter(function(x){ return x.id === threadId; })[0];
+  if(!m) return;
+  var a = ASK[threadId];
+  FORM = { thread:m, name:cleanSubject(m.subject), board:"", group:"", parent:"", work:"Action", ceo:"Ready for CEO", due:"",
+           assign:true, note:(a && a.state === "ok") ? a.text : "", busy:false, msg:"", err:false, done:null, drafting:false };
+  renderForm();
+}
+function closeForm(){ FORM = null; var x = el("modal"); if(x) x.remove(); }
+function renderForm(){
+  if(!FORM) return;
+  var f = FORM, x = el("modal");
+  if(!x){ x = document.createElement("div"); x.id = "modal"; x.className = "modal-bg"; document.body.appendChild(x); }
+  var boards = parentBoards();
+  var ex = f.board ? BOARD_EXTRA[f.board] : null;
+  var opt = function(v, t, sel){ return '<option value="' + esc(v) + '"' + (sel ? " selected" : "") + ">" + esc(t) + "</option>"; };
+  var items = ex ? ex.items.filter(function(i){ return !f.group || i.group === f.group; }) : [];
+  x.innerHTML = '<div class="modal" role="dialog" aria-label="Create a Monday task">' +
+    "<h3>New Monday task</h3>" +
+    '<div class="sub">from: ' + esc(f.thread.subject) + "</div>" +
+    '<label class="fld">Task name<input id="f-name" value="' + esc(f.name) + '" placeholder="e.g. Send the tax document to…"></label>' +
+    '<div class="frow">' +
+      '<label class="fld">Board<select id="f-board">' + opt("", "Choose a board…", !f.board) + boards.map(function(b){ return opt(b.id, b.name, b.id === f.board); }).join("") + "</select></label>" +
+      '<label class="fld">Group<select id="f-group"' + (ex ? "" : " disabled") + ">" + (ex ? opt("", "Choose a group…", !f.group) + ex.groups.map(function(g){ return opt(g.id, g.title, g.id === f.group); }).join("") : opt("", f.board ? "loading…" : "— pick a board first")) + "</select></label>" +
+    "</div>" +
+    '<label class="fld">Under a project (makes it a subitem)<select id="f-parent"' + (ex ? "" : " disabled") + ">" + opt("", "No — top-level item", !f.parent) + items.map(function(i){ return opt(i.id, i.label || i.name, i.id === f.parent); }).join("") + "</select></label>" +
+    '<div class="frow">' +
+      '<label class="fld">Work type<select id="f-work">' + ["Action","Project","Open File","Idea"].map(function(w){ return opt(w, WORK_LABEL[w] || w, w === f.work); }).join("") + "</select></label>" +
+      (f.work === "Action"
+        ? '<label class="fld">CEO Status<select id="f-ceo">' + ["Ready for CEO","CEO Working On It","Request for CEO"].map(function(s){ return opt(s, s, s === f.ceo); }).join("") + "</select></label>"
+        : '<label class="fld">CEO Status<select disabled><option>— blank (not a task)</option></select></label>') +
+    "</div>" +
+    '<div class="frow">' +
+      '<label class="fld">Due date<input id="f-due" type="date" value="' + esc(f.due) + '"></label>' +
+      '<label class="fchk" style="align-self:end;padding-bottom:9px"><input id="f-assign" type="checkbox"' + (f.assign ? " checked" : "") + "> Assign to Gordon</label>" +
+    "</div>" +
+    '<label class="fld">First update on the item (what is needed)<textarea id="f-note" placeholder="A short note of what this is about and what is needed. The email link goes in CEO Link automatically.">' + esc(f.note) + "</textarea></label>" +
+    (SAMPLE ? '<button class="flink" id="f-draft" type="button"' + (f.drafting ? " disabled" : "") + ">" + (f.drafting ? "Drafting…" : "Draft it with Claude from the thread") + "</button>" : "") +
+    '<div class="mact">' +
+      (f.msg ? '<span class="note' + (f.err ? " err" : "") + '">' + f.msg + "</span>" : "") +
+      '<button class="btn" id="f-cancel" type="button">' + (f.done ? "Close" : "Cancel") + "</button>" +
+      (f.done ? "" : '<button class="btn primary" id="f-create" type="button"' + (f.busy ? " disabled" : "") + ">" + (f.busy ? "Creating…" : "Create on Monday") + "</button>") +
+    "</div></div>";
+  if(f.board && !ex){
+    boardExtra(f.board).then(function(){ if(FORM && FORM.board === f.board) renderForm(); })
+      .catch(function(e){ if(FORM){ FORM.msg = "Couldn't read that board's groups."; FORM.err = true; renderForm(); } });
+  }
+}
+function readForm(){
+  var f = FORM; if(!f) return;
+  var g = function(id){ var e = el(id); return e ? e.value : undefined; };
+  if(g("f-name") !== undefined) f.name = g("f-name");
+  if(g("f-due") !== undefined) f.due = g("f-due");
+  if(g("f-note") !== undefined) f.note = g("f-note");
+  var c = el("f-assign"); if(c) f.assign = c.checked;
+  var ce = el("f-ceo"); if(ce && !ce.disabled) f.ceo = ce.value;
+}
+function draftNote(){
+  var f = FORM; if(!f || !SAMPLE || !MCP) return;
+  readForm(); f.drafting = true; renderForm();
+  MCP.callTool(GMAIL, "get_thread", {threadId:f.thread.id, messageFormat:"PLAIN_TEXT"}, {cache:false})
+    .then(function(r){
+      var body = (payloadOf(r).messages || []).slice(-8).map(function(x){
+        return "From: " + (x.sender || "") + "\nDate: " + (x.date || "") + "\n\n" + cleanBody(x.plaintextBody || x.snippet);
+      }).join("\n\n-----\n\n");
+      return SAMPLE("Summarise this email thread as a task note for Gordon Dreger (CEO, Wheel & Anchor, " + (MAIL.addr || GORDON_MAIL) +
+        "). Under 80 words, plain text, no headings: what it's about, who is waiting, and exactly what Gordon needs to do or decide, with any date or amount.\n\n=== THREAD ===\n" + body, {modelTier:"quick"});
+    })
+    .then(function(res){ if(FORM){ FORM.note = res.text.trim(); FORM.drafting = false; renderForm(); } })
+    .catch(function(e){ if(FORM){ FORM.drafting = false; FORM.msg = "Couldn't draft the note" + (e && e.code === "not_granted" ? " — Claude wasn't allowed for this page." : "."); FORM.err = true; renderForm(); } });
+}
+function createTask(){
+  var f = FORM; if(!f || f.busy) return;
+  readForm();
+  if(!f.name.trim()){ f.msg = "Give the task a name."; f.err = true; renderForm(); return; }
+  if(!f.board){ f.msg = "Choose a board."; f.err = true; renderForm(); return; }
+  if(!f.parent && !f.group){ f.msg = "Choose a group, or a project to sit under."; f.err = true; renderForm(); return; }
+  var pb = ALL_BOARDS[f.board], tb = f.parent ? subBoardOf(pb) : pb;
+  if(!tb){ f.msg = "That board has no subitem board, so it can't take subitems."; f.err = true; renderForm(); return; }
+  var cv = {}, c = tb.cols;
+  if(c[COL.work]) cv[c[COL.work]] = {labels:[f.work]};
+  if(c[COL.ceo] && f.work === "Action") cv[c[COL.ceo]] = {label:f.ceo};
+  if(c[COL.who] && f.assign) cv[c[COL.who]] = {personsAndTeams:[{id:GORDON_ID, kind:"person"}]};
+  if(c[COL.due] && f.due) cv[c[COL.due]] = {date:f.due};
+  if(c[COL.link]) cv[c[COL.link]] = {url:f.thread.url, text:"Email: " + cleanSubject(f.thread.subject).slice(0, 60)};
+  f.busy = true; f.msg = ""; f.err = false; renderForm();
+  var q, vars = {n:f.name.trim(), cv:JSON.stringify(cv)};
+  if(f.parent){ q = "mutation($n:String!,$cv:JSON!){ it: create_subitem(parent_item_id:" + f.parent + ", item_name:$n, column_values:$cv) { id url } }"; }
+  else { q = "mutation($n:String!,$cv:JSON!){ it: create_item(board_id:" + f.board + ', group_id:"' + f.group + '", item_name:$n, column_values:$cv) { id url } }'; }
+  gql(q, vars)
+    .then(function(d){
+      var it = d.it || {}; f.done = it;
+      var note = f.note.trim();
+      if(!note) return;
+      return gql("mutation($b:String!){ u: create_update(item_id:" + it.id + ", body:$b) { id } }", {b:note}).catch(function(){ f.msg = "Created, but the update didn't save — add it on Monday."; f.err = true; });
+    })
+    .then(function(){
+      f.busy = false;
+      if(!f.msg) f.msg = 'Created on Monday' + (f.done && f.done.url ? ' — <a href="' + esc(f.done.url) + '" target="_blank" rel="noopener">open it</a>' : "") + ". The list will refresh.";
+      renderForm();
+      setTimeout(function(){ load(); }, 800);
+    })
+    .catch(function(e){
+      f.busy = false; f.err = true;
+      var mm = mcpMessage(e && e.code, e && e.message, MONDAY);
+      f.msg = (e && e.code === "tool_error" && e.message) ? "Monday said: " + esc(e.message) : mm.t + " " + mm.m;
+      renderForm();
+    });
+}
+document.addEventListener("change", function(e){
+  if(!FORM) return;
+  var id = e.target.id;
+  if(id === "f-board"){ readForm(); FORM.board = e.target.value; FORM.group = ""; FORM.parent = ""; FORM.msg = ""; renderForm(); }
+  else if(id === "f-group"){ readForm(); FORM.group = e.target.value; FORM.parent = ""; renderForm(); }
+  else if(id === "f-parent"){ readForm(); FORM.parent = e.target.value; renderForm(); }
+  else if(id === "f-work"){ readForm(); FORM.work = e.target.value; renderForm(); }
+});
+document.addEventListener("keydown", function(e){ if(e.key === "Escape" && FORM && !FORM.busy) closeForm(); });
+
+function mailSection(){
+  var pre = srcState(MAIL, GMAIL);
+  var body;
+  if(pre) body = pre;
+  else if(!MAIL.items.length) body = '<div class="list"><div class="empty">Nothing under ' + esc(MAIL.label) + ' right now.</div></div>';
+  else body = '<div class="list">' + MAIL.items.map(function(m){
+    var a = ASK[m.id];
+    return '<div class="mrow' + (ASSIST ? " owner" : "") + '"><div class="m-main">' +
+      '<a class="m-subj" href="' + esc(m.url) + '" target="_blank" rel="noopener">' + esc(m.subject) + "</a>" +
+      '<div class="m-sub"><span class="from">' + esc(m.from) + '</span><span class="sep">&middot;</span><span class="when">' + esc(whenLabel(m.date)) + "</span>" +
+      (m.count > 1 ? '<span class="sep">&middot;</span><span>' + m.count + " in thread</span>" : "") + "</div>" +
+      (m.snippet ? '<div class="m-snip">' + esc(m.snippet) + "</div>" : "") +
+      "</div>" +
+      (ASSIST ? '<button class="tag plus" data-plus="' + esc(m.id) + '" title="Create a Monday task from this email">+ Task</button>' : "") +
+      (SAMPLE ? '<button class="tag ask" data-ask="' + esc(m.id) + '"' + (a && a.state === "loading" ? " disabled" : "") + ">" +
+         (a && a.state === "ok" ? (a.open ? "Hide" : "Show") : "Ask Claude") + "</button>" : "<span></span>") +
+      '<a class="open" href="' + esc(m.url) + '" target="_blank" rel="noopener" title="Open in Gmail" aria-label="Open in Gmail">' + OPEN_SVG + "</a></div>" +
+      askPanel(a);
+  }).join("") + "</div>";
+  var count = MAIL.state === "ok" ? MAIL.items.length : null;
+  return sec(esc(MAIL.label || "GD To Check"), count, esc(MAIL.addr || GORDON_MAIL), body);
+}
+function calRow(e){
+  var nowT = new Date(), cls = "c-time";
+  if(!e.allDay){ if(e.end < nowT) cls += " past"; else if(e.start <= nowT) cls += " now"; }
+  var t = e.allDay ? "all day" : hhmm(e.start) + "–" + hhmm(e.end);
+  var sub = e.who.length ? "with " + e.who.slice(0, 4).join(", ") + (e.who.length > 4 ? " +" + (e.who.length - 4) : "") : (e.where || "");
+  return '<div class="crow"><div class="' + cls + '">' + t + '</div>' +
+    '<div class="c-main"><div class="c-title">' + esc(e.title) + "</div>" + (sub ? '<div class="c-sub">' + esc(sub) + "</div>" : "") + "</div>" +
+    (e.join ? '<a class="tag join" href="' + esc(e.join) + '" target="_blank" rel="noopener">Join</a>' : "<span></span>") +
+    '<a class="open" href="' + esc(e.url || "#") + '" target="_blank" rel="noopener" title="Open in Calendar" aria-label="Open in Calendar">' + OPEN_SVG + "</a></div>";
+}
+function calSection(mode){
+  var pre = srcState(CAL, GCAL);
+  if(mode === "today"){
+    if(pre) return sec("Today's calls &amp; events", null, "", pre);
+    var todays = CAL.events.filter(function(e){ return sameDay(e.start, TODAY); });
+    var body = todays.length ? '<div class="list">' + todays.map(calRow).join("") + "</div>"
+                             : '<div class="list"><div class="empty">Nothing in the calendar today.</div></div>';
+    return sec("Today's calls &amp; events", todays.length, "", body);
+  }
+  if(pre) return sec("The week ahead", null, "", pre);
+  var week = CAL.events.filter(function(e){ var n = Math.round((new Date(e.start.getFullYear(), e.start.getMonth(), e.start.getDate()) - TODAY) / 86400000); return n >= 0 && n <= 7; });
+  if(!week.length) return sec("The week ahead", 0, "", '<div class="list"><div class="empty">Nothing in the calendar this week.</div></div>');
+  var byDay = {};
+  week.forEach(function(e){ var k = isoLocal(e.start).slice(0, 10); (byDay[k] = byDay[k] || []).push(e); });
+  var out = Object.keys(byDay).sort().map(function(k){
+    var d = parseD(k), n = Math.round((d - TODAY) / 86400000);
+    var name = n === 0 ? "Today" : n === 1 ? "Tomorrow" : DOW[d.getDay()];
+    return '<div class="day"><span class="dname">' + name + '</span><span class="ddate">' + shortD(k) + '</span><span class="dcount">' + byDay[k].length + "</span></div>" +
+      byDay[k].map(calRow).join("");
+  }).join("");
+  return sec("The week ahead", week.length, "", '<div class="list">' + out + "</div>");
+}
+
+/* ============================ views ============================ */
+var VIEWS = [
+  {k:"today", label:"Today",
+   desc:"What needs you today — tasks due or overdue, what you are already working on, and what lands within three days."},
+  {k:"week", label:"What's coming",
+   desc:"Dated tasks for the next fortnight, grouped by the day they fall due."},
+  {k:"projects", label:"Projects",
+   desc:"Work with an end date."},
+  {k:"open", label:"Open files",
+   desc:"Work with no end date. Nothing here is late and nothing here will chase you, until you decide to turn some of it into tasks."},
+  {k:"ideas", label:"Wish list",
+   desc:"Things you have logged but not started. Nothing here is owed to anyone. Come here when you have time to begin something new, and it moves to Projects once it is underway. Labelled <b>Idea</b> on Monday."},
+  {k:"all", label:"All tasks not done",
+   desc:"Everything still open, nested the way Monday holds it: area, then group, then project, then the items beneath it. Anything you have finished has moved to Completed."},
+  {k:"done", label:"Completed",
+   desc:"What you have marked CEO Done and handed back to the assistant, and what she has since Closed."}
+];
+function countFor(k){
+  if(!LOADED) return "";
+  var a = actions();
+  if(k === "today") return a.filter(function(d){ var n = days(d.due); return (n !== null && n <= 0) || d.ceo === "CEO Working On It"; }).length;
+  if(k === "week") return a.filter(function(d){ var n = days(d.due); return n !== null && n >= 0 && n <= 14; }).length;
+  if(k === "projects") return visible().filter(function(d){ return d.work === "Project"; }).length;
+  if(k === "open") return visible().filter(function(d){ return d.work === "Open File"; }).length;
+  if(k === "ideas") return visible().filter(function(d){ return d.work === "Idea"; }).length;
+  if(k === "all") return visible().length;
+  if(k === "done") return ITEMS.filter(function(d){ return d.ceo === "CEO Done"; }).length;
+  return "";
+}
+function viewBody(k){
+  if(k === "today"){
+    var a = actions();
+    var dueNow = a.filter(function(d){ var n = days(d.due); return n !== null && n <= 0; });
+    var working = a.filter(function(d){ return d.ceo === "CEO Working On It"; });
+    var soon = a.filter(function(d){ var n = days(d.due); return n !== null && n > 0 && n <= 3; });
+    return mailSection() +
+      calSection("today") +
+      sec("Due today &amp; overdue", dueNow.length, "tasks only", flatList(dueNow, "Nothing is due today.")) +
+      sec("You're already working on these", working.length, "CEO Working On It", flatList(working, "Nothing marked as in progress.")) +
+      sec("Upcoming tasks in the next 3 days", soon.length, "", flatList(soon, "Clear for the next three days."));
+  }
+  if(k === "week"){
+    var a2 = actions();
+    var past = a2.filter(function(d){ var n = days(d.due); return n !== null && n < 0; });
+    var win = a2.filter(function(d){ var n = days(d.due); return n !== null && n >= 0 && n <= 14; });
+    var later = a2.filter(function(d){ var n = days(d.due); return n !== null && n > 14; });
+    var body;
+    if(!win.length){ body = '<div class="list"><div class="empty">Nothing dated in the next fourteen days.</div></div>'; }
+    else {
+      var byDay = {};
+      win.forEach(function(d){ (byDay[d.due] = byDay[d.due] || []).push(d); });
+      body = '<div class="list">' + Object.keys(byDay).sort().map(function(key){
+        var n = days(key), name = n === 0 ? "Today" : n === 1 ? "Tomorrow" : DOW[parseD(key).getDay()];
+        var nodes = byDay[key].map(function(d){ return {id:d.id, d:d, cont:null, kids:[]}; }).sort(cmp);
+        return '<div class="day"><span class="dname">' + name + '</span><span class="ddate">' + shortD(key) +
+          '</span><span class="dcount">' + nodes.length + "</span></div>" +
+          nodes.map(function(x){ return row(x, 0, {showArea:true, showGroup:true, showPath:true}); }).join("");
+      }).join("") + "</div>";
+    }
+    return calSection("week") +
+      (past.length ? sec("Still open from earlier", past.length, "", flatList(past, "")) : "") +
+      sec("Next fourteen days", win.length, "grouped by due date", body) +
+      sec("Further out", later.length, "", flatList(later, "Nothing dated beyond two weeks."));
+  }
+  if(k === "projects"){
+    var projs = visible().filter(function(d){ return d.work === "Project"; });
+    var undated = projs.filter(function(d){ return !d.due; }).length;
+    return sec("Projects", projs.length, undated ? undated + " with no date" : "",
+      nestedByArea(projs, "No projects match these filters."));
+  }
+  if(k === "open"){
+    var of = visible().filter(function(d){ return d.work === "Open File"; });
+    var live = of.filter(function(d){ return d.due; });
+    var quiet = of.filter(function(d){ return !d.due; });
+    return sec("With a date set", live.length, "these ones want attention", flatList(live, "Nothing here has a date.")) +
+      sec("Running quietly", quiet.length, "no end date — look when you choose to", flatList(quiet, "Nothing here."));
+  }
+  if(k === "ideas"){
+    var ideas = visible().filter(function(d){ return d.work === "Idea"; });
+    return sec("Wish list", ideas.length, "nothing here is owed to anyone",
+      flatList(ideas, "No ideas logged yet."));
+  }
+  if(k === "all"){
+    var v = visible();
+    var counts = {};
+    WORK_TYPES.forEach(function(t){ counts[t] = v.filter(function(d){ return d.work === t; }).length; });
+    var untyped = v.filter(function(d){ return !d.work; }).length;
+    var hint = WORK_TYPES.map(function(t){ return counts[t] + " " + WORK_PLURAL[t]; }).join(" · ") +
+      (untyped ? " · " + untyped + " untyped" : "");
+    var body2 = F.nest ? nestedByArea(v, "No tasks match these filters.") : flatList(v, "No tasks match these filters.");
+    return sec("All tasks not done", v.length, hint, body2);
+  }
+  if(k === "done"){
+    var ceoDone = ITEMS.filter(function(d){ return d.ceo === "CEO Done"; });
+    var closed = ITEMS.filter(function(d){ return d.ceo === "Closed"; }).sort(function(a,b){
+      return String(b.updated).localeCompare(String(a.updated)); }).slice(0, 40);
+    return sec("Finished by you, with the assistant", ceoDone.length, "waiting for her to send on and set Closed",
+        flatList(ceoDone, "Nothing waiting with the assistant.")) +
+      sec("Closed", closed.length, "most recently updated first",
+        flatList(closed, "Nothing closed yet."));
+  }
+  return "";
+}
+
+/* ============================ shell render ============================ */
+function renderTabs(){
+  el("tabs").innerHTML = VIEWS.map(function(v){
+    var c = countFor(v.k);
+    return '<button class="tab" role="tab" data-view="' + v.k + '" aria-selected="' + (v.k === current) + '">' +
+      v.label + (c === "" ? "" : ' <span class="n">' + c + "</span>") + "</button>";
+  }).join("");
+}
+function renderStrip(){
+  if(!LOADED){ el("strip").innerHTML = ""; return; }
+  var v = visible(), a = actions();
+  var c = function(s){ return v.filter(function(d){ return d.ceo === s; }).length; };
+  var late = a.filter(function(d){ var n = days(d.due); return n !== null && n < 0; }).length;
+  var week = a.filter(function(d){ var n = days(d.due); return n !== null && n >= 0 && n <= 7; }).length;
+  var noDate = a.filter(function(d){ return !d.due; }).length;
+  el("strip").innerHTML = [
+    late ? '<span class="stat hot"><b>' + late + "</b> overdue</span>" : "",
+    '<span class="stat go"><b>' + c("Ready for CEO") + "</b> ready for you</span>",
+    c("CEO Working On It") ? '<span class="stat warn"><b>' + c("CEO Working On It") + "</b> you&rsquo;re working on</span>" : "",
+    c("Needs Info") ? '<span class="stat"><b>' + c("Needs Info") + "</b> needs info</span>" : "",
+    '<span class="stat"><b>' + week + "</b> due in 7 days</span>",
+    noDate ? '<span class="stat"><b>' + noDate + "</b> tasks need a date</span>" : ""
+  ].filter(Boolean).join("");
+}
+function renderNotice(){
+  var n = el("notice");
+  if(LOAD_ERR && LOAD_ERR.fatal){
+    var m = mcpMessage(LOAD_ERR.code, LOAD_ERR.message);
+    n.innerHTML = '<div class="note bad"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+      '<circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg></span><div><b>' + esc(m.t) + "</b>" + esc(m.m) +
+      (PERMS && PERM_STATE !== "unavailable" ? '<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" id="perm-ask" type="button">Allow connectors</button><button class="btn" id="perm-manage" type="button">Open permissions</button></div>' : "") +
+      "</div></div>";
+    return;
+  }
+  if(LOAD_ERR && LOAD_ERR.partial){
+    n.innerHTML = '<div class="note"><span class="ni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+      '<circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg></span><div><b>Some boards did not answer</b>' +
+      esc(LOAD_ERR.boards.map(function(b){ return b.board; }).join(", ")) +
+      ". Everything else below is current — try Refresh for the rest.</div></div>";
+    return;
+  }
+  n.innerHTML = "";
+}
+function render(){
+  renderTabs(); renderStrip(); renderNotice();
+  el("rail").hidden = !LOADED;
+  var host = el("views");
+  if(!LOADED){
+    if(LOAD_ERR && LOAD_ERR.fatal){ host.innerHTML = ""; return; }
+    host.innerHTML = sec("Reading Monday", null, "",
+      '<div class="skel"><div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div></div>');
+    return;
+  }
+  var vmeta = VIEWS.filter(function(v){ return v.k === current; })[0];
+  host.innerHTML = '<section class="view">' +
+    (vmeta && vmeta.desc ? '<p class="viewdesc">' + vmeta.desc + "</p>" : "") +
+    viewBody(current) + "</section>";
+  ["area","proj","ceo","due"].forEach(function(k){ el("w-" + k).classList.toggle("on", !!F[k]); });
+  save();
+}
+
+/* ============================ writing back ============================ */
+function setCeo(itemId, boardId, colId, value, selEl){
+  var msg = document.querySelector('[data-msg="' + itemId + '"]');
+  var d = BY_ID[itemId], prev = d ? d.ceo : "";
+  if(msg){ msg.className = "stmsg"; msg.textContent = "saving…"; }
+  if(selEl){ selEl.disabled = true; selEl.className = "stsel " + (CEO_META[value] || CEO_META[""]).cls; }
+  if(!MCP){
+    if(msg){ msg.className = "stmsg err"; msg.textContent = "Not connected to Monday"; }
+    if(selEl){ selEl.disabled = false; selEl.value = prev; }
+    return Promise.resolve();
+  }
+  var cv = JSON.stringify(value ? (function(){ var o = {}; o[colId] = {label:value}; return o; })()
+                                : (function(){ var o = {}; o[colId] = null; return o; })());
+  return MCP.callTool(MONDAY, "change_item_column_values",
+      {boardId:Number(boardId), itemId:Number(itemId), columnValues:cv}, {cache:false})
+    .then(function(){
+      if(d) d.ceo = value;
+      if(msg){ msg.className = "stmsg ok"; msg.textContent = "saved"; }
+      if(selEl) selEl.disabled = false;
+      renderStrip(); renderTabs();
+      setTimeout(function(){ render(); }, 900);
+    })
+    .catch(function(err){
+      if(selEl){ selEl.disabled = false; selEl.value = prev; selEl.className = "stsel " + (CEO_META[prev] || CEO_META[""]).cls; }
+      var m = mcpMessage(err && err.code, err && err.message);
+      if(msg){ msg.className = "stmsg err"; msg.textContent = m.t; }
+    });
+}
+
+/* ============================ events ============================ */
+document.addEventListener("click", function(e){
+  var s = e.target.closest("[data-sort]");
+  if(s){ var k = s.dataset.sort; if(sortBy === k) sortDir = -sortDir; else { sortBy = k; sortDir = 1; } render(); return; }
+  var n = e.target.closest("[data-node]");
+  if(n){ var key = n.dataset.node; collapsed[key] = !collapsed[key]; render(); return; }
+  var t = e.target.closest("[data-view]");
+  if(t){ current = t.dataset.view; render(); return; }
+  if(FORM){
+    if(e.target.id === "f-cancel"){ if(!FORM.busy) closeForm(); return; }
+    if(e.target.id === "f-create"){ createTask(); return; }
+    if(e.target.id === "f-draft"){ draftNote(); return; }
+    if(e.target.id === "modal" && !FORM.busy){ closeForm(); return; }
+    return;
+  }
+  if(e.target.id === "perm-ask" && PERMS){
+    e.target.disabled = true; e.target.textContent = "Asking…";
+    Promise.resolve(PERMS.request(["mcp"])).then(function(){ return window.claude.use("mcp"); })
+      .then(function(m){ MCP = m || null; return readPerm(); }).then(function(){ load(); })
+      .catch(function(){ load(); });
+    return;
+  }
+  if(e.target.id === "perm-manage" && PERMS){
+    Promise.resolve(PERMS.manage()).then(function(){ return readPerm(); }).then(function(){ return window.claude.use("mcp"); })
+      .then(function(m){ MCP = m || null; load(); }).catch(function(){ load(); });
+    return;
+  }
+  var pl = e.target.closest("[data-plus]");
+  if(pl){ openForm(pl.dataset.plus); return; }
+  var ak = e.target.closest("[data-ask]");
+  if(ak){ askMail(ak.dataset.ask); return; }
+  var db = e.target.closest("[data-done]");
+  if(db){
+    var id = db.dataset.done, d = BY_ID[id];
+    if(!d) return;
+    db.disabled = true; db.textContent = "saving…";
+    setCeo(id, d.boardId, d.ceoCol, "CEO Done", null).then(function(){ render(); });
+    return;
+  }
+});
+document.addEventListener("change", function(e){
+  if(e.target.classList && e.target.classList.contains("stsel")){
+    setCeo(e.target.dataset.item, e.target.dataset.board, e.target.dataset.col, e.target.value, e.target);
+  }
+});
+el("refresh").addEventListener("click", function(){ load(); });
+
+function opts(items, allLabel){
+  return '<option value="">' + allLabel + "</option>" + items.map(function(o){
+    return '<option value="' + esc(o.v) + '">' + esc(o.l) + "</option>"; }).join("");
+}
+function fillRail(){
+  var v = ITEMS.filter(mineNow);
+  var areaCount = {};
+  v.forEach(function(d){ areaCount[d.area] = (areaCount[d.area] || 0) + 1; });
+  el("f-area").innerHTML = opts(AREAS.filter(function(a){ return areaCount[a]; }).map(function(a){
+    return {v:a, l:a + " (" + areaCount[a] + ")"}; }), "All areas");
+  var projIds = {};
+  v.forEach(function(d){ if(d.parentId) projIds[d.parentId] = 1; if(d.work === "Project") projIds[d.id] = 1; });
+  var projs = Object.keys(projIds).map(function(id){
+    var o = BY_ID[id];
+    if(o) return {v:id, l:o.name, area:o.area};
+    var kid = v.filter(function(x){ return x.parentId === id; })[0];
+    return kid ? {v:id, l:kid.parentName, area:kid.area} : null;
+  }).filter(Boolean).filter(function(o){ return !F.area || o.area === F.area; })
+    .sort(function(a,b){ return a.l.localeCompare(b.l); });
+  el("f-proj").innerHTML = opts(projs, "All projects");
+  var ceoCount = {};
+  v.forEach(function(d){ ceoCount[d.ceo] = (ceoCount[d.ceo] || 0) + 1; });
+  el("f-ceo").innerHTML = opts(["Ready for CEO","CEO Working On It","Needs Info","CEO Done",""]
+    .filter(function(k){ return ceoCount[k]; }).map(function(k){
+      return {v: k === "" ? "__none" : k, l: (k || "No CEO status") + " (" + ceoCount[k] + ")"}; }), "Any CEO status");
+  el("f-area").value = F.area; el("f-proj").value = F.proj; el("f-ceo").value = F.ceo;
+  el("f-due").value = F.due; el("f-search").value = F.search; el("f-nest").checked = F.nest;
+}
+el("f-search").addEventListener("input", function(e){ F.search = e.target.value.trim(); render(); });
+el("f-area").addEventListener("change", function(e){ F.area = e.target.value; F.proj = ""; fillRail(); render(); });
+el("f-proj").addEventListener("change", function(e){ F.proj = e.target.value; render(); });
+el("f-ceo").addEventListener("change", function(e){ F.ceo = e.target.value; render(); });
+el("f-due").addEventListener("change", function(e){ F.due = e.target.value; render(); });
+el("f-nest").addEventListener("change", function(e){ F.nest = e.target.checked; render(); });
+el("f-clear").addEventListener("click", function(){
+  F.search = ""; F.area = ""; F.proj = ""; F.ceo = ""; F.due = ""; F.nest = true;
+  sortBy = "due"; sortDir = 1; fillRail(); render();
+});
+
+/* ============================ boot ============================ */
+render();
+function readPerm(){
+  if(!PERMS) return Promise.resolve("");
+  return Promise.resolve(PERMS.state("mcp")).then(function(s){ PERM_STATE = s || ""; return s; }).catch(function(){ PERM_STATE = ""; return ""; });
+}
+(function(){
+  var p = (window.claude && window.claude.use) ? window.claude.use("mcp") : Promise.resolve(null);
+  var pp = (window.claude && window.claude.use) ? window.claude.use("permissions") : Promise.resolve(null);
+  Promise.all([Promise.resolve(p).catch(function(){ return null; }), Promise.resolve(pp).catch(function(){ return null; })])
+    .then(function(r){ MCP = r[0] || null; PERMS = r[1] || null; return readPerm(); })
+    .then(function(){ load(); }, function(){ load(); });
+  var tg = el("assist-toggle");
+  function paintAssist(){ tg.checked = ASSIST; el("assist-label").className = ASSIST ? "on" : ""; el("assist-label").textContent = ASSIST ? "Assistant tools on — + Task shows on each email" : "Assistant tools"; }
+  paintAssist();
+  tg.addEventListener("change", function(){ ASSIST = tg.checked; try{ localStorage.setItem("gd-assist", ASSIST ? "1" : "0"); }catch(e){} paintAssist(); if(LOADED) render(); });
+  var s = (window.claude && window.claude.use) ? window.claude.use("sample") : Promise.resolve(null);
+  Promise.resolve(s).then(function(fn){ SAMPLE = (typeof fn === "function") ? fn : null; if(LOADED) render(); }, function(){ SAMPLE = null; });
+})();
+</script>
