@@ -10,4 +10,4 @@ person's own Monday, Gmail and Google Calendar through their own connectors.
 - `gordons-desk.html` — the source page Elsa edits with Claude
 - `build.js` — splits the source into `dist/desk.js`
 - `shell.html` — the page each person publishes once from their own Claude
-- Releasing: bump `version` in `package.json`, commit, tag `vX.Y.Z`, push the tag. GitHub Actions publishes to npm; every shell picks it up on next refresh (shells load `@1`, so bump the major only for a breaking change).
+- Releasing: bump `version` in `package.json` and push to `main`. GitHub Actions builds and publishes to npm; every shell picks it up on next refresh (shells load `@1`, so bump the major only for a breaking change).

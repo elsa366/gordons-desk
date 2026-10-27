@@ -1,13 +1,14 @@
 name: Publish desk.js to npm
 on:
   push:
-    tags: ["v*"]
+    branches: ["main"]
+    paths: ["package.json", "gordons-desk.html", "build.js"]
+  workflow_dispatch:
 jobs:
   publish:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -15,6 +16,10 @@ jobs:
           node-version: 22
           registry-url: https://registry.npmjs.org
       - run: node build.js
-      - run: npm publish --access public
+      - name: Publish if this version isn't on npm yet
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          V=$(node -p "require('./package.json').version")
+          if npm view "wa-gordons-desk@$V" version >/dev/null 2>&1; then echo "v$V already published"; exit 0; fi
+          npm publish --access public
