@@ -248,6 +248,8 @@ select.stsel option{background:var(--surface);color:var(--ink)}
 .tag.ask:hover{color:var(--accent)}
 .tag.ask[disabled]{opacity:.6;cursor:default}
 .m-ask{padding:4px 14px 14px 14px;font-size:13.5px;line-height:1.5;color:var(--ink)}
+.r-main .m-ask{padding:8px 0 2px 0}
+.tag.ask.sm{padding:1px 7px;font-size:11px}
 .m-ask .box{background:var(--accent-soft);border-radius:10px;padding:12px 14px;white-space:pre-wrap;overflow-wrap:anywhere}
 .m-ask .box b{display:block;margin-top:8px}
 .m-ask .box b:first-child{margin-top:0}
@@ -374,6 +376,7 @@ var GORDON_ID = 27166904;                 /* Monday user id for Gordon Dreger */
 var MONDAY = "monday.com", GMAIL = "Gmail", GCAL = "Google Calendar";
 var MAIL = {state:"idle", items:[], err:null, label:"", labelId:"", addr:""};
 var SAMPLE = null, ASK = {}; /* thread id → {state, text} */
+var TASK_ASK = {}; /* item id → {state, text, open} */
 var ASSIST = false; try{ ASSIST = localStorage.getItem("gd-assist") === "1"; }catch(e){}
 var BOARD_EXTRA = {}; /* boardId → {groups:[{id,title}], items:[{id,name,group}]} */
 var GORDON_MAIL = "gordon@wheelandanchor.ca";
@@ -818,6 +821,9 @@ function row(n, depth, opts){
   if(d && d.task) bits.push("<span>&ldquo;" + esc(d.task) + "&rdquo;</span>");
   if(d && d.work === "Action" && !d.due) bits.push('<span class="tag warnflag">needs a date</span>');
   if(d && d.link) bits.push('<a class="tag" href="' + esc(d.link) + '" target="_blank" rel="noopener">reference &nearr;</a>');
+  var ta = d ? TASK_ASK[d.id] : null;
+  if(d && SAMPLE) bits.push('<button class="tag ask sm" type="button" data-task-ask="' + d.id + '"' + (ta && ta.state === "loading" ? " disabled" : "") + ">" +
+    (ta && ta.state === "ok" ? (ta.open ? "Hide" : "Show brief") : "Ask Claude") + "</button>");
 
   var canDone = d && d.ceo !== "CEO Done" && d.ceo !== "Closed" && d.ceo !== "Not for CEO";
   return '<div class="' + cls.join(" ") + '">' +
@@ -825,6 +831,7 @@ function row(n, depth, opts){
       (hasKids ? '<button class="caret' + (open ? " open" : "") + '" type="button" data-node="' + n.id + '" aria-expanded="' + open + '" aria-label="Toggle subitems">&#9656;</button>' : "") +
       '<span class="r-title">' + esc(o.name) + "</span></div>" +
       (bits.length ? '<div class="r-sub">' + bits.join('<span class="sep">&middot;</span>') + "</div>" : "") +
+      askPanel(ta) +
     "</div>" +
     '<div class="r-type"><span class="type t-' + String(o.work || "").replace(/\s/g,"") + '">' + esc(WORK_LABEL[o.work] || (d ? "—" : "parent")) + "</span></div>" +
     (d ? statusSelect(d) : '<div class="stcell"><span class="stpill v-none">not his item</span></div>') +
@@ -938,12 +945,62 @@ function askPanel(a){
   if(a.state === "loading") return '<div class="m-ask"><div class="box think">' + esc(a.text || "Reading the thread…") + "</div></div>";
   if(a.state === "error") return '<div class="m-ask"><div class="box bad">' + esc(a.text) + "</div></div>";
   var t = esc(a.text).replace(/^(What this is about|What.s needed from you|Nothing needed from you)[:.]?\s*$/gim, "<b>$1</b>")
-                     .replace(/^\*\*(.+?)\*\*:?\s*$/gm, "<b>$1</b>").replace(/\*\*/g, "");
+                     .replace(/^\*\*(.+?)\*\*:?\s*$/gm, "<b>$1</b>").replace(/\*\*/g, "")
+                     .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
   return '<div class="m-ask"><div class="box">' + t + "</div></div>";
 }
 function cleanBody(s){
   return String(s || "").split("\n").filter(function(l){ return !/^\s*>/.test(l); }).join("\n")
     .replace(/\n{3,}/g, "\n\n").replace(/\[image:[^\]]*\]/g, "").trim().slice(0, 6000);
+}
+function askTask(id){
+  var d = BY_ID[id];
+  if(!d || !SAMPLE || !MCP) return;
+  var a = TASK_ASK[id];
+  if(a && a.state === "ok"){ a.open = !a.open; render(); return; }
+  if(a && a.state === "loading") return;
+  TASK_ASK[id] = {state:"loading", text:"Reading the Monday item…", open:true}; render();
+  gql("query { items(ids:[" + id + "]) { name url created_at board { name } group { title } parent_item { name url } " +
+      "column_values { id text ... on MirrorValue { display_value } ... on LinkValue { url } column { title } } " +
+      "updates(limit:12) { text_body created_at creator { name } } " +
+      "subitems { name column_values(types:[status]) { text column { title } } } } }")
+    .then(function(res){
+      var it = (res.items || [])[0]; if(!it) throw {code:"tool_error", message:"Item not found"};
+      var cols = (it.column_values || []).map(function(c){
+        var v = c.text || c.display_value || c.url || ""; return v ? ((c.column && c.column.title) || c.id) + ": " + v : null;
+      }).filter(Boolean);
+      var ups = (it.updates || []).map(function(u){
+        return "- " + String(u.created_at || "").slice(0,10) + " " + ((u.creator && u.creator.name) || "") + ": " + String(u.text_body || "").replace(/\s+/g, " ").slice(0, 900);
+      });
+      var subs = (it.subitems || []).map(function(s){
+        var st = (s.column_values || []).filter(function(c){ return c.column && /^(CEO )?Status$/.test(c.column.title); }).map(function(c){ return c.text; }).filter(Boolean).join(", ");
+        return "- " + s.name + (st ? " (" + st + ")" : "");
+      });
+      var body = "Board: " + ((it.board && it.board.name) || "") + (it.group ? " / " + it.group.title : "") +
+        (it.parent_item ? "\nPart of project: " + it.parent_item.name : "") +
+        "\nItem: " + it.name + "\nCreated: " + String(it.created_at || "").slice(0,10) +
+        "\n\nColumns:\n" + cols.join("\n") +
+        (subs.length ? "\n\nSubitems:\n" + subs.join("\n") : "") +
+        "\n\nUpdates (newest first):\n" + (ups.length ? ups.join("\n") : "(none)");
+      var prompt = "You are briefing Gordon Dreger, founder and CEO of Wheel & Anchor (group travel), on one item from his Monday.com task board. " +
+        "Someone on his team logged it for him; 'Logged By' is who. 'CEO Task' / 'CEO Text' is their one-line ask; 'CEO Link' is the reference they attached; updates are the conversation on the item.\n\n" +
+        "Write for Gordon, plain English, no preamble, under 130 words, exactly these headings on their own lines:\n" +
+        "What this is about\n(two or three sentences: what it is, who logged it and why, where it stands)\n\n" +
+        "What's needed from you\n(the specific decision, reply or action; any due date; who is waiting. If the item gives too little to say, say so plainly and suggest he asks the person who logged it.)\n\n" +
+        "If there is a link, end with one line: Link: <url>. Plain text, no markdown.\n\n=== MONDAY ITEM ===\n" + body;
+      TASK_ASK[id].text = "Thinking…"; render();
+      return SAMPLE(prompt, {modelTier:"quick", onText:function(t){ TASK_ASK[id].text = t.text; render(); }});
+    })
+    .then(function(res){ TASK_ASK[id] = {state:"ok", text:res.text, open:true}; render(); })
+    .catch(function(e){
+      var code = e && e.code, msg;
+      if(code === "not_granted") msg = "Claude wasn't allowed for this page. Allow it when asked, then try again.";
+      else if(code === "rate_limited") msg = "Claude is busy — give it a moment and try again.";
+      else if(code === "cancelled") msg = "Stopped.";
+      else if(code === "tool_error") msg = "Monday said: " + (e.message || "couldn't read the item.");
+      else msg = "Couldn't brief this task. Open it in Monday instead.";
+      TASK_ASK[id] = {state:"error", text:msg, open:true}; render();
+    });
 }
 function askMail(id){
   var m = MAIL.items.filter(function(x){ return x.id === id; })[0];
@@ -1409,6 +1466,8 @@ document.addEventListener("click", function(e){
   }
   var pl = e.target.closest("[data-plus]");
   if(pl){ openForm(pl.dataset.plus); return; }
+  var tk = e.target.closest("[data-task-ask]");
+  if(tk){ askTask(tk.dataset.taskAsk); return; }
   var ak = e.target.closest("[data-ask]");
   if(ak){ askMail(ak.dataset.ask); return; }
   var db = e.target.closest("[data-done]");
