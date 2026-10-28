@@ -522,11 +522,20 @@ function loadMail(){
       var hit = labels.filter(function(l){ return /gd\s*to\s*check/i.test(l.name || ""); })[0];
       if(!hit) throw {code:"no_label"};
       MAIL.label = hit.name; MAIL.labelId = hit.labelId;
-      return MCP.callTool(GMAIL, "search_threads",
-        {query:'label:"' + hit.name + '"', pageSize:50, view:"THREAD_VIEW_MINIMAL"}, {cache:false});
+      /* Gmail matches labels by display name; emoji and spaces make that fragile, so try a few spellings. */
+      var plain = String(hit.name).replace(/[^\w\s\/-]/g, "").trim();
+      var queries = ['label:"' + hit.name + '"', 'label:"' + plain + '"', "label:" + plain.replace(/[\s\/]+/g, "-"), 'in:anywhere label:"' + plain + '"'];
+      MAIL.tried = [];
+      var tryNext = function(i){
+        if(i >= queries.length) return {threads:[]};
+        MAIL.tried.push(queries[i]);
+        return MCP.callTool(GMAIL, "search_threads", {query:queries[i], pageSize:50, view:"THREAD_VIEW_MINIMAL"}, {cache:false})
+          .then(function(r){ var p = payloadOf(r); if(p.error) throw {code:"tool_error", message:String(p.error.message || p.error)}; return (p.threads || []).length ? p : tryNext(i + 1); });
+      };
+      return tryNext(0);
     })
-    .then(function(r){
-      var threads = payloadOf(r).threads || [];
+    .then(function(p){
+      var threads = p.threads || [];
       threads.some(function(t){ var m = /authuser=([^#&]+)/.exec(t.viewUrl || ""); if(m){ MAIL.addr = decodeURIComponent(m[1]); return true; } });
       MAIL.items = threads.map(function(t){
         var msgs = t.messages || [];
@@ -1193,7 +1202,8 @@ function mailSection(){
   var pre = srcState(MAIL, GMAIL);
   var body;
   if(pre) body = pre;
-  else if(!MAIL.items.length) body = '<div class="list"><div class="empty">Nothing under ' + esc(MAIL.label) + ' right now.</div></div>';
+  else if(!MAIL.items.length) body = '<div class="list"><div class="empty">Nothing under ' + esc(MAIL.label) + ' right now.' +
+    '<div style="margin-top:6px;font-size:11.5px;color:var(--ink3);font-family:var(--f-mono)">searched: ' + esc((MAIL.tried || []).join("  |  ")) + "</div></div></div>";
   else body = '<div class="list">' + MAIL.items.map(function(m){
     var a = ASK[m.id];
     return '<div class="mrow' + (ASSIST ? " owner" : "") + '"><div class="m-main">' +
