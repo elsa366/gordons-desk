@@ -302,6 +302,7 @@ select.stsel option{background:var(--surface);color:var(--ink)}
 .loading-line{font-size:13px;color:var(--ink3);display:flex;align-items:center;gap:8px}
 
 .foot{border-top:1px solid var(--line);padding-top:14px;font-size:12.5px;color:var(--ink3);display:flex;flex-direction:column;gap:5px}
+.foot-ver{font-family:var(--f-mono);font-size:11px;opacity:.75}
 .aswitch{display:inline-flex;align-items:center;gap:8px;margin-top:6px;font-size:12.5px;color:var(--ink2);cursor:pointer;user-select:none}
 .aswitch input{width:15px;height:15px;accent-color:var(--accent);margin:0}
 .aswitch .on{color:var(--accent);font-weight:600}
@@ -367,11 +368,13 @@ select.stsel option{background:var(--surface);color:var(--ink)}
     <span id="foot-1">Read live each time this page opens: every Monday board with a CEO Status column, the Gmail threads under GD To Check, and the calendar for the fortnight ahead.</span>
     <span>Shows anything assigned to Gordon, or carrying a CEO Status. Finished work moves to Completed. Items at Request for CEO wait for the assistant's triage and are not shown here.</span>
     <label class="aswitch" title="For the assistant: adds a + Task button on each email that creates the item on Monday"><input type="checkbox" id="assist-toggle"> <span id="assist-label">Assistant tools</span></label>
+    <span id="foot-ver" class="foot-ver" title="Version of the dashboard script this page is running"></span>
   </footer>
 </div>
 
 <script>
 /* ============================ constants ============================ */
+(function(){ var fv = document.getElementById("foot-ver"); if(fv) fv.textContent = window.__GD_DESK_LOADED ? "Gordon's Desk v" + window.__GD_DESK_LOADED : "Gordon's Desk — preview build"; })();
 var GORDON_ID = 27166904;                 /* Monday user id for Gordon Dreger */
 var MONDAY = "monday.com", GMAIL = "Gmail", GCAL = "Google Calendar";
 var MAIL = {state:"idle", items:[], err:null, label:"", labelId:"", addr:""};
