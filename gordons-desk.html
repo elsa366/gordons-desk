@@ -915,7 +915,6 @@ function dayHead(k, name, dlabel, count){
     '<span class="caret' + (open ? " open" : "") + '" aria-hidden="true">&#9656;</span><span class="dname">' + name +
     '</span><span class="ddate">' + dlabel + '</span><span class="dcount">' + count + "</span></div>";
 }
-function lst(items, msg, scope){ return F.nest ? nestedByArea(items, msg, scope) : flatList(items, msg); }
 
 /* tree for nested views */
 function buildTree(items){
@@ -1351,9 +1350,9 @@ function viewBody(k){
     var soon = a.filter(function(d){ var n = days(d.due); return n !== null && n > 0 && n <= 3; });
     return mailSection() +
       calSection("today") +
-      sec("Due today &amp; overdue", dueNow.length, "tasks only", lst(dueNow, "Nothing is due today.", "t-due")) +
-      sec("You're already working on these", working.length, "CEO Working On It", lst(working, "Nothing marked as in progress.", "t-work")) +
-      sec("Upcoming tasks in the next 3 days", soon.length, "", lst(soon, "Clear for the next three days.", "t-soon"));
+      sec("Due today &amp; overdue", dueNow.length, "tasks only", flatList(dueNow, "Nothing is due today.")) +
+      sec("You're already working on these", working.length, "CEO Working On It", flatList(working, "Nothing marked as in progress.")) +
+      sec("Upcoming tasks in the next 3 days", soon.length, "", flatList(soon, "Clear for the next three days."));
   }
   if(k === "week"){
     var a2 = actions();
