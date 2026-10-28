@@ -143,7 +143,7 @@ button{cursor:pointer}
 .sec-h .hint{font-size:12.5px;color:var(--ink3);margin-left:auto;text-align:right}
 .list{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
 
-.cols{display:grid;grid-template-columns:minmax(0,1fr) 82px 178px 150px 70px 32px;gap:10px;align-items:center}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) 82px 178px 150px 32px;gap:10px;align-items:center}
 .lhead{padding:0 14px;background:var(--sunk);border-bottom:1px solid var(--line)}
 .lhead button,.lhead span{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:600;color:var(--ink3);
   background:none;border:0;padding:9px 0;text-align:left;display:flex;align-items:center;gap:4px}
@@ -202,9 +202,6 @@ select.stsel option{background:var(--surface);color:var(--ink)}
 .due.late{color:var(--late-fg);font-weight:500}
 .due.now{color:var(--today-fg);font-weight:500}
 .due.never{color:var(--ink3)}
-.donebtn{border:1px solid var(--line);background:none;border-radius:999px;padding:4px 9px;font-size:11.5px;font-weight:600;color:var(--ink2);white-space:nowrap}
-.donebtn:hover{border-color:var(--ok-fg);color:var(--ok-fg);background:var(--done-bg)}
-.donebtn[disabled]{opacity:.5;cursor:default}
 .open{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--ink3);text-decoration:none;border:1px solid transparent;justify-self:end}
 .open:hover{background:var(--sunk);color:var(--accent);border-color:var(--line)}
 .open svg{width:15px;height:15px}
@@ -318,10 +315,9 @@ select.stsel option{background:var(--surface);color:var(--ink)}
 
 @media (max-width:980px){
   .cols{grid-template-columns:minmax(0,1fr) 150px 32px;gap:6px 10px;align-items:start}
-  .lhead .h-type,.lhead .h-due,.lhead .h-act{display:none}
+  .lhead .h-type,.lhead .h-due{display:none}
   .row .r-type{grid-column:1;grid-row:2}
   .row .r-due{grid-column:1;grid-row:3}
-  .row .r-act{grid-column:1;grid-row:4}
   .row .stcell{grid-row:1;grid-column:2}
   .row .open{grid-row:1;grid-column:3}
   .row.nested.lv0{--ind:22px}
@@ -875,7 +871,6 @@ function row(n, depth, opts){
   if(d && SAMPLE) bits.push('<button class="tag ask sm" type="button" data-task-ask="' + d.id + '"' + (opts.assigned ? ' data-mode="assigned"' : "") + (ta && ta.state === "loading" ? " disabled" : "") + ">" +
     (ta && ta.state === "ok" ? (ta.open ? "Hide" : "Show brief") : "Ask Claude") + "</button>");
 
-  var canDone = d && d.ceo !== "CEO Done" && d.ceo !== "Closed" && d.ceo !== "Not for CEO";
   return '<div class="' + cls.join(" ") + '">' +
     '<div class="r-main"><div class="r-top">' +
       (hasKids ? '<button class="caret' + (open ? " open" : "") + '" type="button" data-node="' + n.id + '" aria-expanded="' + open + '" aria-label="Toggle subitems">&#9656;</button>' : "") +
@@ -886,7 +881,6 @@ function row(n, depth, opts){
     '<div class="r-type"><span class="type t-' + String(o.work || "").replace(/\s/g,"") + '">' + esc(WORK_LABEL[o.work] || (d ? "—" : "parent")) + "</span></div>" +
     (d ? statusSelect(d) : '<div class="stcell"><span class="stpill v-none">not his item</span></div>') +
     '<div class="r-due">' + (d ? dueCell(d) : "") + "</div>" +
-    '<div class="r-act">' + (canDone ? '<button class="donebtn" type="button" data-done="' + d.id + '">Done</button>' : "") + "</div>" +
     '<a class="open" href="' + esc(o.url || "#") + '" target="_blank" rel="noopener" title="Open in Monday" aria-label="Open in Monday">' +
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg></a>' +
     "</div>";
@@ -898,7 +892,7 @@ function head(){
       var cls = (sortBy === s[0] ? "on" : "") + (i === 1 ? " h-type" : "") + (i === 3 ? " h-due" : "");
       return '<button type="button" class="' + cls + '" data-sort="' + s[0] + '">' + s[1] +
         (sortBy === s[0] ? '<span class="arrow">' + (sortDir === 1 ? "▲" : "▼") + "</span>" : "") + "</button>";
-    }).join("") + '<span class="h-act"></span><span></span></div>';
+    }).join("") + '<span></span></div>';
 }
 function flatList(items, emptyMsg, opts){
   if(!items.length) return '<div class="list"><div class="empty">' + emptyMsg + "</div></div>";
@@ -1332,7 +1326,7 @@ var VIEWS = [
   {k:"all", label:"All tasks not done",
    desc:"Everything still open, nested the way Monday holds it: area, then group, then project, then the items beneath it. Anything you have finished has moved to Completed."},
   {k:"assigned", label:"Assigned by Gordon",
-   desc:"Tasks you logged on Monday and gave to someone else, which they have not marked Done yet. Their own Status shows where they are; Ask Claude reads their updates on Monday. When you are satisfied, mark it CEO Done and it leaves this list."},
+   desc:"Tasks you logged on Monday and gave to someone else, which they have not marked Done yet. Their own Status shows where they are; Ask Claude reads their updates on Monday. When you are satisfied, set its CEO Status to CEO Done and it leaves this list."},
   {k:"done", label:"Completed",
    desc:"What you have marked CEO Done and handed back to the assistant, and what she has since Closed."}
 ];
@@ -1556,14 +1550,6 @@ document.addEventListener("click", function(e){
   if(tk){ askTask(tk.dataset.taskAsk, tk.dataset.mode); return; }
   var ak = e.target.closest("[data-ask]");
   if(ak){ askMail(ak.dataset.ask); return; }
-  var db = e.target.closest("[data-done]");
-  if(db){
-    var id = db.dataset.done, d = BY_ID[id];
-    if(!d) return;
-    db.disabled = true; db.textContent = "saving…";
-    setCeo(id, d.boardId, d.ceoCol, "CEO Done", null).then(function(){ render(); });
-    return;
-  }
 });
 document.addEventListener("change", function(e){
   if(e.target.classList && e.target.classList.contains("stsel")){
