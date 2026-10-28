@@ -303,6 +303,15 @@ select.stsel option{background:var(--surface);color:var(--ink)}
 
 .foot{border-top:1px solid var(--line);padding-top:14px;font-size:12.5px;color:var(--ink3);display:flex;flex-direction:column;gap:5px}
 .foot-ver{font-family:var(--f-mono);font-size:11px;opacity:.75}
+.sec-h[data-node]{cursor:pointer;user-select:none;border-radius:8px}
+.sec-h[data-node]:hover h2{color:var(--accent)}
+.sec-h .caret,.day .caret{align-self:center}
+.day[data-node]{cursor:pointer;user-select:none}
+.day[data-node]:hover .dname{color:var(--accent)}
+.tag.who{background:var(--k6);color:var(--k6f)}
+.tag.st{background:var(--working-bg);color:var(--working-fg)}
+.tag.st.stuck{background:var(--late-bg);color:var(--late-fg)}
+.tag.st.idle{background:var(--sunk);color:var(--ink2)}
 .aswitch{display:inline-flex;align-items:center;gap:8px;margin-top:6px;font-size:12.5px;color:var(--ink2);cursor:pointer;user-select:none}
 .aswitch input{width:15px;height:15px;accent-color:var(--accent);margin:0}
 .aswitch .on{color:var(--accent);font-weight:600}
@@ -365,7 +374,7 @@ select.stsel option{background:var(--surface);color:var(--ink)}
   <main id="views"></main>
 
   <footer class="foot">
-    <span id="foot-1">Read live each time this page opens: every Monday board with a CEO Status column, the Gmail threads under GD To Check, and the calendar for the fortnight ahead.</span>
+    <span id="foot-1">Read live each time this page opens: every Monday board with a CEO Status column (plus anything Gordon logged for someone else), the Gmail threads under GD To Check, and the calendar for the fortnight ahead. Click any heading to fold it away.</span>
     <span>Shows anything assigned to Gordon, or carrying a CEO Status. Finished work moves to Completed. Items at Request for CEO wait for the assistant's triage and are not shown here.</span>
     <label class="aswitch" title="For the assistant: adds a + Task button on each email that creates the item on Monday"><input type="checkbox" id="assist-toggle"> <span id="assist-label">Assistant tools</span></label>
     <span id="foot-ver" class="foot-ver" title="Version of the dashboard script this page is running"></span>
@@ -385,7 +394,12 @@ var BOARD_EXTRA = {}; /* boardId → {groups:[{id,title}], items:[{id,name,group
 var GORDON_MAIL = "gordon@wheelandanchor.ca";
 var CAL  = {state:"idle", events:[], err:null};
 var COL = {ceo:"CEO Status", work:"Work Type", who:"Assignee", due:"Due Date",
-           status:"Status", golive:"Go-Live Date", link:"CEO Link", task:"CEO Task", task2:"CEO Text"};
+           status:"Status", golive:"Go-Live Date", link:"CEO Link", task:"CEO Task", task2:"CEO Text",
+           logged:"Logged By", logged2:"Logged by", loggedDate:"Logged Date"};
+/* "Assigned by Gordon": logged by him, assigned to someone else, their Status not finished. */
+var DONE_RX = /^(done|completed?|closed|cancell?ed)$/i;
+function othersOn(d){ return String(d.who || "").split(/\s*,\s*/).filter(function(n){ return n && !/^gordon\b/i.test(n); }); }
+function assignedNow(d){ return !!d.byGordon && othersOn(d).length > 0 && !DONE_RX.test(String(d.status || "").trim()) && !HIDE_FROM_GORDON[d.ceo]; }
 /* Trip boards carry the trip dates on the trip item, which is usually the parent. */
 var TRIP_TL    = ["Trip Dates","Trip Timeline","Inspection Dates"];
 var TRIP_START = ["Trip Start Date","Start Date"];
@@ -464,6 +478,8 @@ try {
     current = saved.current || current; sortBy = saved.sortBy || sortBy;
     sortDir = saved.sortDir || sortDir; collapsed = saved.collapsed || {}; }
 } catch(e){}
+(function(){ var t = isoLocal(TODAY).slice(0, 10);
+  Object.keys(collapsed).forEach(function(k){ var m = /^day:\w+:(\d{4}-\d{2}-\d{2})$/.exec(k); if(m && m[1] < t) delete collapsed[k]; }); })();
 function save(){ try{ localStorage.setItem("gd-state",
   JSON.stringify({F:F, current:current, sortBy:sortBy, sortDir:sortDir, collapsed:collapsed})); }catch(e){} }
 
@@ -599,21 +615,36 @@ function discoverBoards(){
 }
 
 function boardQuery(b){
-  var ids = [], want = [COL.ceo, COL.work, COL.who, COL.due, COL.status, COL.golive, COL.link, COL.task, COL.task2].concat(TRIP_ALL);
+  var ids = [], want = [COL.ceo, COL.work, COL.who, COL.due, COL.status, COL.golive, COL.link, COL.task, COL.task2, COL.logged, COL.logged2].concat(TRIP_ALL);
   want.forEach(function(t){ if(b.cols[t] && ids.indexOf(b.cols[t]) === -1) ids.push(b.cols[t]); });
   var idList = ids.map(function(i){ return '"' + i + '"'; }).join(",");
   var rules = '{column_id:"' + b.cols[COL.ceo] + '", compare_value:[], operator:is_not_empty}';
   if(b.cols[COL.who]) rules += ',{column_id:"' + b.cols[COL.who] + '", compare_value:["person-' + GORDON_ID + '"], operator:any_of}';
-  return 'query { boards(ids:[' + b.id + ']) { id name items_page(limit:300, query_params:{rules:[' + rules + '], operator:or}) {' +
-         ' items { id name url updated_at group { title } parent_item { id name group { title } board { id } }' +
-         ' column_values(ids:[' + idList + ']) { id text ... on MirrorValue { display_value } } } } } }';
+  var fields = ' items { id name url updated_at group { title } parent_item { id name group { title } board { id } }' +
+         ' column_values(ids:[' + idList + ']) { id text ... on MirrorValue { display_value } } }';
+  var q = 'query { boards(ids:[' + b.id + ']) { id name mine: items_page(limit:300, query_params:{rules:[' + rules + '], operator:or}) {' + fields + ' }';
+  var lg = b.cols[COL.logged] || b.cols[COL.logged2], ld = b.cols[COL.loggedDate];
+  if(lg) q += ' byg: items_page(limit:300, query_params:{rules:[{column_id:"' + lg + '", compare_value:["person-' + GORDON_ID + '"], operator:any_of}]' +
+              (ld ? ', order_by:[{column_id:"' + ld + '", direction:desc}]' : '') + '}) {' + fields + ' }';
+  return q + ' } }';
 }
 
 function loadBoard(b){
   return gql(boardQuery(b)).then(function(d){
     var board = (d.boards || [])[0];
     if(!board) return [];
-    return (board.items_page && board.items_page.items || []).map(function(it){
+    var out = [], seen = {};
+    var take = function(page, mine){
+      ((page && page.items) || []).forEach(function(it){
+        var x = seen[it.id];
+        if(x){ if(mine) x.inMine = true; else x.byGordon = true; return; }
+        x = mapItem(it); x.inMine = mine; x.byGordon = !mine || /\bgordon\b/i.test(x.logged);
+        seen[it.id] = x; out.push(x);
+      });
+    };
+    take(board.mine, true); take(board.byg, false);
+    return out;
+    function mapItem(it){
       var cv = {};
       (it.column_values || []).forEach(function(c){ cv[c.id] = c.text || c.display_value || ""; });
       var get = function(title){ var id = b.cols[title]; return id ? (cv[id] || "") : ""; };
@@ -628,9 +659,10 @@ function loadBoard(b){
         ceo: get(COL.ceo), work: get(COL.work), who: get(COL.who), due: get(COL.due),
         status: get(COL.status), golive: get(COL.golive), link: get(COL.link),
         task: get(COL.task) || get(COL.task2),
+        logged: get(COL.logged) || get(COL.logged2),
         ceoCol: b.cols[COL.ceo]
       };
-    });
+    }
   }).catch(function(err){
     return {__err:true, board:b.name, code: err && err.code, message: err && err.message};
   });
@@ -734,11 +766,11 @@ function indexItems(){
   ITEMS.forEach(function(d){ if(d.parentId){ (KIDS[d.parentId] = KIDS[d.parentId] || []).push(d); } });
 }
 function isProject(d){ return d.work === "Project" || (KIDS[d.id] && KIDS[d.id].length > 0); }
-function mineNow(d){ return !HIDE_FROM_GORDON[d.ceo]; }
+function mineNow(d){ return d.inMine !== false && !HIDE_FROM_GORDON[d.ceo]; }
 
 /* ============================ filtering ============================ */
-function matches(d){
-  if(!mineNow(d)) return false;
+function matches(d){ return mineNow(d) && matchesFilters(d); }
+function matchesFilters(d){
   if(F.area && d.area !== F.area) return false;
   if(F.proj && d.parentId !== F.proj && d.id !== F.proj) return false;
   if(F.ceo){ var want = F.ceo === "__none" ? "" : F.ceo; if(d.ceo !== want) return false; }
@@ -752,7 +784,7 @@ function matches(d){
   }
   if(F.search){
     var q = F.search.toLowerCase();
-    var hay = [d.name, d.group, d.parentName, d.area, d.ceo, d.status, d.work, d.task].join(" ").toLowerCase();
+    var hay = [d.name, d.group, d.parentName, d.area, d.ceo, d.status, d.work, d.task, d.who, d.logged].join(" ").toLowerCase();
     if(hay.indexOf(q) === -1) return false;
   }
   return true;
@@ -818,6 +850,11 @@ function row(n, depth, opts){
   if(d && (d.ceo === "CEO Done" || d.ceo === "Closed" || d.status === "Done")) cls.push("dim");
 
   var bits = [];
+  if(opts.assigned && d){
+    bits.push('<span class="tag who">' + esc(othersOn(d).join(", ")) + "</span>");
+    var stx = String(d.status || "").trim();
+    bits.push('<span class="tag st' + (/stuck|block|wait/i.test(stx) ? " stuck" : (!stx || /not (actioned|started)/i.test(stx)) ? " idle" : "") + '">' + esc(stx || "No status") + "</span>");
+  }
   if(opts.showArea) bits.push('<span class="chip" style="' + areaStyle(o.area) + '">' + esc(o.area) + '</span>');
   if(opts.showGroup && o.group) bits.push("<span>" + esc(o.group) + "</span>");
   if(opts.showPath && d && d.parentName) bits.push("<span>in " + esc(d.parentName) + "</span>");
@@ -830,12 +867,12 @@ function row(n, depth, opts){
   }
   if(!d) bits.push("<span>" + n.kids.length + " of his " + (n.kids.length === 1 ? "task" : "tasks") + " sit here</span>");
   if(d && d.golive) bits.push("<span>go-live " + shortD(d.golive) + "</span>");
-  if(d && d.status && d.status !== "Not Actioned Yet") bits.push("<span>" + esc(d.status) + "</span>");
+  if(d && !opts.assigned && d.status && d.status !== "Not Actioned Yet") bits.push("<span>" + esc(d.status) + "</span>");
   if(d && d.task) bits.push("<span>&ldquo;" + esc(d.task) + "&rdquo;</span>");
   if(d && d.work === "Action" && !d.due) bits.push('<span class="tag warnflag">needs a date</span>');
   if(d && d.link) bits.push('<a class="tag" href="' + esc(d.link) + '" target="_blank" rel="noopener">reference &nearr;</a>');
-  var ta = d ? TASK_ASK[d.id] : null;
-  if(d && SAMPLE) bits.push('<button class="tag ask sm" type="button" data-task-ask="' + d.id + '"' + (ta && ta.state === "loading" ? " disabled" : "") + ">" +
+  var ta = d ? TASK_ASK[opts.assigned ? "a:" + d.id : d.id] : null;
+  if(d && SAMPLE) bits.push('<button class="tag ask sm" type="button" data-task-ask="' + d.id + '"' + (opts.assigned ? ' data-mode="assigned"' : "") + (ta && ta.state === "loading" ? " disabled" : "") + ">" +
     (ta && ta.state === "ok" ? (ta.open ? "Hide" : "Show brief") : "Ask Claude") + "</button>");
 
   var canDone = d && d.ceo !== "CEO Done" && d.ceo !== "Closed" && d.ceo !== "Not for CEO";
@@ -870,11 +907,21 @@ function flatList(items, emptyMsg, opts){
     return row(n, 0, Object.assign({showArea:true, showGroup:true, showPath:true}, opts || {}));
   }).join("") + "</div>";
 }
-function sec(title, count, hint, body){
-  return '<div class="sec"><div class="sec-h"><h2>' + title + "</h2>" +
+function sec(title, count, hint, body, key){
+  var k = "sec:" + current + ":" + (key || String(title).replace(/<[^>]*>/g, "").replace(/&amp;/g, "&"));
+  var open = !collapsed[k];
+  return '<div class="sec"><div class="sec-h" role="button" tabindex="0" data-node="' + esc(k) + '" aria-expanded="' + open + '">' +
+    '<span class="caret' + (open ? " open" : "") + '" aria-hidden="true">&#9656;</span><h2>' + title + "</h2>" +
     (count !== null ? '<span class="count">' + count + "</span>" : "") +
-    (hint ? '<span class="hint">' + hint + "</span>" : "") + "</div>" + body + "</div>";
+    (hint ? '<span class="hint">' + hint + "</span>" : "") + "</div>" + (open ? body : "") + "</div>";
 }
+function dayHead(k, name, dlabel, count){
+  var open = !collapsed[k];
+  return '<div class="day" role="button" tabindex="0" data-node="' + esc(k) + '" aria-expanded="' + open + '">' +
+    '<span class="caret' + (open ? " open" : "") + '" aria-hidden="true">&#9656;</span><span class="dname">' + name +
+    '</span><span class="ddate">' + dlabel + '</span><span class="dcount">' + count + "</span></div>";
+}
+function lst(items, msg, scope){ return F.nest ? nestedByArea(items, msg, scope) : flatList(items, msg); }
 
 /* tree for nested views */
 function buildTree(items){
@@ -915,22 +962,23 @@ function renderNode(n, depth, opts){
   }
   return html;
 }
-function nestedByArea(items, emptyMsg){
+function nestedByArea(items, emptyMsg, scope){
+  var px = scope ? scope + ":" : "";
   if(!items.length) return '<div class="list"><div class="empty">' + emptyMsg + "</div></div>";
   var roots = buildTree(items), byArea = {};
   roots.forEach(function(n){ var a = (n.d || n.cont).area || "—"; (byArea[a] = byArea[a] || []).push(n); });
   var order = Object.keys(byArea).sort();
   return '<div class="list">' + order.map(function(a){
-    var open = !collapsed["area:" + a];
+    var open = !collapsed["area:" + px + a];
     var total = byArea[a].reduce(function(s,n){ return s + countLeaves(n); }, 0);
-    var out = '<button class="band area" type="button" data-node="area:' + esc(a) + '" aria-expanded="' + open + '">' +
+    var out = '<button class="band area" type="button" data-node="area:' + esc(px + a) + '" aria-expanded="' + open + '">' +
       '<span class="caret' + (open ? " open" : "") + '">&#9656;</span><span class="bname">' + esc(a) +
       '</span><span class="count">' + total + "</span></button>";
     if(!open) return out;
     var byGrp = {};
     byArea[a].forEach(function(n){ var g = (n.d || n.cont).group || "—"; (byGrp[g] = byGrp[g] || []).push(n); });
     Object.keys(byGrp).sort().forEach(function(g){
-      var gk = "grp:" + a + ":" + g, gOpen = !collapsed[gk];
+      var gk = "grp:" + px + a + ":" + g, gOpen = !collapsed[gk];
       var gTotal = byGrp[g].reduce(function(s,n){ return s + countLeaves(n); }, 0);
       out += '<button class="band grp" type="button" data-node="' + esc(gk) + '" aria-expanded="' + gOpen + '">' +
         '<span class="caret' + (gOpen ? " open" : "") + '">&#9656;</span><span class="bname">' + esc(g) +
@@ -957,7 +1005,7 @@ function askPanel(a){
   if(!a || (a.state === "ok" && !a.open)) return "";
   if(a.state === "loading") return '<div class="m-ask"><div class="box think">' + esc(a.text || "Reading the thread…") + "</div></div>";
   if(a.state === "error") return '<div class="m-ask"><div class="box bad">' + esc(a.text) + "</div></div>";
-  var t = esc(a.text).replace(/^(What this is about|What.s needed from you|Nothing needed from you)[:.]?\s*$/gim, "<b>$1</b>")
+  var t = esc(a.text).replace(/^(What this is about|What.s needed from you|Nothing needed from you|Who has it|Where it stands|Anything waiting on you)[:.]?\s*$/gim, "<b>$1</b>")
                      .replace(/^\*\*(.+?)\*\*:?\s*$/gm, "<b>$1</b>").replace(/\*\*/g, "")
                      .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
   return '<div class="m-ask"><div class="box">' + t + "</div></div>";
@@ -966,13 +1014,14 @@ function cleanBody(s){
   return String(s || "").split("\n").filter(function(l){ return !/^\s*>/.test(l); }).join("\n")
     .replace(/\n{3,}/g, "\n\n").replace(/\[image:[^\]]*\]/g, "").trim().slice(0, 6000);
 }
-function askTask(id){
+function askTask(id, mode){
   var d = BY_ID[id];
   if(!d || !SAMPLE || !MCP) return;
-  var a = TASK_ASK[id];
+  var key = mode === "assigned" ? "a:" + id : id;
+  var a = TASK_ASK[key];
   if(a && a.state === "ok"){ a.open = !a.open; render(); return; }
   if(a && a.state === "loading") return;
-  TASK_ASK[id] = {state:"loading", text:"Reading the Monday item…", open:true}; render();
+  TASK_ASK[key] = {state:"loading", text:"Reading the Monday item…", open:true}; render();
   gql("query { items(ids:[" + id + "]) { name url created_at board { name } group { title } parent_item { name url } " +
       "column_values { id text ... on MirrorValue { display_value } ... on LinkValue { url } column { title } } " +
       "updates(limit:12) { text_body created_at creator { name } } " +
@@ -995,16 +1044,16 @@ function askTask(id){
         "\n\nColumns:\n" + cols.join("\n") +
         (subs.length ? "\n\nSubitems:\n" + subs.join("\n") : "") +
         "\n\nUpdates (newest first):\n" + (ups.length ? ups.join("\n") : "(none)");
-      var prompt = "You are briefing Gordon Dreger, founder and CEO of Wheel & Anchor (group travel), on one item from his Monday.com task board. " +
+      var prompt = mode === "assigned" ? assignedPrompt(body) : "You are briefing Gordon Dreger, founder and CEO of Wheel & Anchor (group travel), on one item from his Monday.com task board. " +
         "Someone on his team logged it for him; 'Logged By' is who. 'CEO Task' / 'CEO Text' is their one-line ask; 'CEO Link' is the reference they attached; updates are the conversation on the item.\n\n" +
         "Write for Gordon, plain English, no preamble, under 130 words, exactly these headings on their own lines:\n" +
         "What this is about\n(two or three sentences: what it is, who logged it and why, where it stands)\n\n" +
         "What's needed from you\n(the specific decision, reply or action; any due date; who is waiting. If the item gives too little to say, say so plainly and suggest he asks the person who logged it.)\n\n" +
         "If there is a link, end with one line: Link: <url>. Plain text, no markdown.\n\n=== MONDAY ITEM ===\n" + body;
-      TASK_ASK[id].text = "Thinking…"; render();
-      return SAMPLE(prompt, {modelTier:"quick", onText:function(t){ TASK_ASK[id].text = t.text; render(); }});
+      TASK_ASK[key].text = "Thinking…"; render();
+      return SAMPLE(prompt, {modelTier:"quick", onText:function(t){ TASK_ASK[key].text = t.text; render(); }});
     })
-    .then(function(res){ TASK_ASK[id] = {state:"ok", text:res.text, open:true}; render(); })
+    .then(function(res){ TASK_ASK[key] = {state:"ok", text:res.text, open:true}; render(); })
     .catch(function(e){
       var code = e && e.code, msg;
       if(code === "not_granted") msg = "Claude wasn't allowed for this page. Allow it when asked, then try again.";
@@ -1012,8 +1061,19 @@ function askTask(id){
       else if(code === "cancelled") msg = "Stopped.";
       else if(code === "tool_error") msg = "Monday said: " + (e.message || "couldn't read the item.");
       else msg = "Couldn't brief this task. Open it in Monday instead.";
-      TASK_ASK[id] = {state:"error", text:msg, open:true}; render();
+      TASK_ASK[key] = {state:"error", text:msg, open:true}; render();
     });
+}
+function assignedPrompt(body){
+  var t = new Date();
+  return "You are briefing Gordon Dreger, founder and CEO of Wheel & Anchor (group travel), on a task HE logged on Monday.com and assigned to someone on his team. " +
+    "'Assignee' is who has it; 'Status' is their own status for it; the updates are their progress reports, newest first. Today is " +
+    t.getFullYear() + "-" + pad2(t.getMonth() + 1) + "-" + pad2(t.getDate()) + ".\n\n" +
+    "Write for Gordon, plain English, no preamble, under 130 words, exactly these headings on their own lines:\n" +
+    "Who has it\n(the person, their Status, the due date and whether it is late)\n\n" +
+    "Where it stands\n(what their latest updates say, with dates; if they have posted no updates, say so plainly and how long ago the item was created)\n\n" +
+    "Anything waiting on you\n(a question or decision they raised for Gordon, or 'Nothing right now'; if it looks finished, say he can mark it CEO Done)\n\n" +
+    "Plain text, no markdown.\n\n=== MONDAY ITEM ===\n" + body;
 }
 function askMail(id){
   var m = MAIL.items.filter(function(x){ return x.id === id; })[0];
@@ -1222,7 +1282,7 @@ function mailSection(){
       askPanel(a);
   }).join("") + "</div>";
   var count = MAIL.state === "ok" ? MAIL.items.length : null;
-  return sec(esc(MAIL.label || "GD To Check"), count, esc(MAIL.addr || GORDON_MAIL), body);
+  return sec(esc(MAIL.label || "GD To Check"), count, esc(MAIL.addr || GORDON_MAIL), body, "mail");
 }
 function calRow(e){
   var nowT = new Date(), cls = "c-time";
@@ -1251,8 +1311,8 @@ function calSection(mode){
   var out = Object.keys(byDay).sort().map(function(k){
     var d = parseD(k), n = Math.round((d - TODAY) / 86400000);
     var name = n === 0 ? "Today" : n === 1 ? "Tomorrow" : DOW[d.getDay()];
-    return '<div class="day"><span class="dname">' + name + '</span><span class="ddate">' + shortD(k) + '</span><span class="dcount">' + byDay[k].length + "</span></div>" +
-      byDay[k].map(calRow).join("");
+    var dk = "day:cal:" + k;
+    return dayHead(dk, name, shortD(k), byDay[k].length) + (collapsed[dk] ? "" : byDay[k].map(calRow).join(""));
   }).join("");
   return sec("The week ahead", week.length, "", '<div class="list">' + out + "</div>");
 }
@@ -1271,6 +1331,8 @@ var VIEWS = [
    desc:"Things you have logged but not started. Nothing here is owed to anyone. Come here when you have time to begin something new, and it moves to Projects once it is underway. Labelled <b>Idea</b> on Monday."},
   {k:"all", label:"All tasks not done",
    desc:"Everything still open, nested the way Monday holds it: area, then group, then project, then the items beneath it. Anything you have finished has moved to Completed."},
+  {k:"assigned", label:"Assigned by Gordon",
+   desc:"Tasks you logged on Monday and gave to someone else, which they have not marked Done yet. Their own Status shows where they are; Ask Claude reads their updates on Monday. When you are satisfied, mark it CEO Done and it leaves this list."},
   {k:"done", label:"Completed",
    desc:"What you have marked CEO Done and handed back to the assistant, and what she has since Closed."}
 ];
@@ -1283,6 +1345,7 @@ function countFor(k){
   if(k === "open") return visible().filter(function(d){ return d.work === "Open File"; }).length;
   if(k === "ideas") return visible().filter(function(d){ return d.work === "Idea"; }).length;
   if(k === "all") return visible().length;
+  if(k === "assigned") return ITEMS.filter(function(d){ return assignedNow(d) && matchesFilters(d); }).length;
   if(k === "done") return ITEMS.filter(function(d){ return d.ceo === "CEO Done"; }).length;
   return "";
 }
@@ -1294,9 +1357,9 @@ function viewBody(k){
     var soon = a.filter(function(d){ var n = days(d.due); return n !== null && n > 0 && n <= 3; });
     return mailSection() +
       calSection("today") +
-      sec("Due today &amp; overdue", dueNow.length, "tasks only", flatList(dueNow, "Nothing is due today.")) +
-      sec("You're already working on these", working.length, "CEO Working On It", flatList(working, "Nothing marked as in progress.")) +
-      sec("Upcoming tasks in the next 3 days", soon.length, "", flatList(soon, "Clear for the next three days."));
+      sec("Due today &amp; overdue", dueNow.length, "tasks only", lst(dueNow, "Nothing is due today.", "t-due")) +
+      sec("You're already working on these", working.length, "CEO Working On It", lst(working, "Nothing marked as in progress.", "t-work")) +
+      sec("Upcoming tasks in the next 3 days", soon.length, "", lst(soon, "Clear for the next three days.", "t-soon"));
   }
   if(k === "week"){
     var a2 = actions();
@@ -1311,9 +1374,9 @@ function viewBody(k){
       body = '<div class="list">' + Object.keys(byDay).sort().map(function(key){
         var n = days(key), name = n === 0 ? "Today" : n === 1 ? "Tomorrow" : DOW[parseD(key).getDay()];
         var nodes = byDay[key].map(function(d){ return {id:d.id, d:d, cont:null, kids:[]}; }).sort(cmp);
-        return '<div class="day"><span class="dname">' + name + '</span><span class="ddate">' + shortD(key) +
-          '</span><span class="dcount">' + nodes.length + "</span></div>" +
-          nodes.map(function(x){ return row(x, 0, {showArea:true, showGroup:true, showPath:true}); }).join("");
+        var dk = "day:tasks:" + key;
+        return dayHead(dk, name, shortD(key), nodes.length) +
+          (collapsed[dk] ? "" : nodes.map(function(x){ return row(x, 0, {showArea:true, showGroup:true, showPath:true}); }).join(""));
       }).join("") + "</div>";
     }
     return calSection("week") +
@@ -1348,6 +1411,15 @@ function viewBody(k){
       (untyped ? " · " + untyped + " untyped" : "");
     var body2 = F.nest ? nestedByArea(v, "No tasks match these filters.") : flatList(v, "No tasks match these filters.");
     return sec("All tasks not done", v.length, hint, body2);
+  }
+  if(k === "assigned"){
+    var as = ITEMS.filter(function(d){ return assignedNow(d) && matchesFilters(d); });
+    if(!as.length) return sec("Assigned by Gordon", 0, "", '<div class="list"><div class="empty">Nothing you logged for someone else is open right now. A task shows here when Logged By is you, the Assignee is someone else, and their Status is not Done.</div></div>');
+    var byP = {};
+    as.forEach(function(d){ var p = othersOn(d)[0]; (byP[p] = byP[p] || []).push(d); });
+    return Object.keys(byP).sort().map(function(p){
+      return sec(esc(p), byP[p].length, "", flatList(byP[p], "", {assigned:true}), "who:" + p);
+    }).join("");
   }
   if(k === "done"){
     var ceoDone = ITEMS.filter(function(d){ return d.ceo === "CEO Done"; });
@@ -1481,7 +1553,7 @@ document.addEventListener("click", function(e){
   var pl = e.target.closest("[data-plus]");
   if(pl){ openForm(pl.dataset.plus); return; }
   var tk = e.target.closest("[data-task-ask]");
-  if(tk){ askTask(tk.dataset.taskAsk); return; }
+  if(tk){ askTask(tk.dataset.taskAsk, tk.dataset.mode); return; }
   var ak = e.target.closest("[data-ask]");
   if(ak){ askMail(ak.dataset.ask); return; }
   var db = e.target.closest("[data-done]");
@@ -1499,6 +1571,12 @@ document.addEventListener("change", function(e){
   }
 });
 el("refresh").addEventListener("click", function(){ load(); });
+document.addEventListener("keydown", function(e){
+  if((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches('[role="button"][data-node]')){
+    e.preventDefault(); var k = e.target.dataset.node; collapsed[k] = !collapsed[k]; render();
+    var f = document.querySelector('[data-node="' + (window.CSS && CSS.escape ? CSS.escape(k) : k) + '"]'); if(f) f.focus();
+  }
+});
 
 function opts(items, allLabel){
   return '<option value="">' + allLabel + "</option>" + items.map(function(o){
