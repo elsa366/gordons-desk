@@ -262,6 +262,10 @@ select.stsel option{background:var(--surface);color:var(--ink)}
 .m-ask .box b:first-child{margin-top:0}
 .m-ask .box.think{color:var(--ink3);font-style:italic}
 .m-ask .box.bad{background:var(--late-bg);color:var(--late-fg)}
+.m-ask .links{margin-top:8px;padding:10px 14px;border:1px solid var(--accent-soft);border-radius:10px;overflow-wrap:anywhere}
+.m-ask .links b{display:block;margin-bottom:4px}
+.m-ask .links .ln{padding:2px 0}
+.m-ask .links .lsrc{color:var(--ink3);font-size:12.5px}
 @media (max-width:640px){ .mrow{grid-template-columns:minmax(0,1fr) 32px} .mrow .tag.ask{grid-column:1;justify-self:start} .mrow .open{grid-column:2;grid-row:1} }
 .tag.plus{background:var(--sunk);color:var(--ink2);cursor:pointer;border:0;font:inherit;font-size:11px;font-weight:600;white-space:nowrap}
 .tag.plus:hover{color:var(--accent);background:var(--accent-soft)}
@@ -1023,6 +1027,19 @@ function srcState(src, server, label){
   }
   return null;
 }
+/* While a brief streams, redraw at most every 200 ms and never between mouse-down and mouse-up,
+   so a click on another control is not lost when the row under it is replaced (1.3.0). */
+var PTR_DOWN = false, SOFT_T = null;
+document.addEventListener("pointerdown", function(){ PTR_DOWN = true; }, true);
+document.addEventListener("pointerup", function(){ PTR_DOWN = false; }, true);
+document.addEventListener("pointercancel", function(){ PTR_DOWN = false; }, true);
+function renderSoft(){
+  if(SOFT_T) return;
+  SOFT_T = setTimeout(function tick(){
+    if(PTR_DOWN){ SOFT_T = setTimeout(tick, 120); return; }
+    SOFT_T = null; render();
+  }, 200);
+}
 function askPanel(a){
   if(!a || (a.state === "ok" && !a.open)) return "";
   if(a.state === "loading") return '<div class="m-ask"><div class="box think">' + esc(a.text || "Reading the thread…") + "</div></div>";
@@ -1030,11 +1047,82 @@ function askPanel(a){
   var t = esc(a.text).replace(/^(What this is about|What.s needed from you|Nothing needed from you|Who has it|Where it stands|Anything waiting on you)[:.]?\s*$/gim, "<b>$1</b>")
                      .replace(/^\*\*(.+?)\*\*:?\s*$/gm, "<b>$1</b>").replace(/\*\*/g, "")
                      .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
-  return '<div class="m-ask"><div class="box">' + t + "</div></div>";
+  return '<div class="m-ask"><div class="box">' + t + "</div>" + linksBlock(a) + "</div>";
 }
 function cleanBody(s){
   return String(s || "").split("\n").filter(function(l){ return !/^\s*>/.test(l); }).join("\n")
     .replace(/\n{3,}/g, "\n\n").replace(/\[image:[^\]]*\]/g, "").trim().slice(0, 6000);
+}
+/* ---- Ask Claude links (1.3): collected in code from columns, updates, replies and files ---- */
+function linkUnHtml(s){
+  return String(s || "").replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&#(\d+);/g, function(m, n){ return String.fromCharCode(+n); })
+    .replace(/&#x([0-9a-f]+);/gi, function(m, n){ return String.fromCharCode(parseInt(n, 16)); }).replace(/&amp;/g, "&")
+    .replace(/[​-‍﻿]/g, "").replace(/\s+/g, " ").trim();
+}
+function linkKey(u){
+  return String(u).trim().replace(/^http:\/\//i, "https://").replace(/^https:\/\/www\./i, "https://").replace(/#$/, "").replace(/\/+(?=$|[?#])/, "").replace(/^https:\/\/[^\/?#]+/i, function(h){ return h.toLowerCase(); });
+}
+function linkShort(u){
+  var m = /^https?:\/\/(?:www\.)?([^\/?#]+)([^?#]*)/i.exec(u), s = m ? m[1] + m[2].replace(/\/+$/, "") : u;
+  return s.length > 60 ? s.slice(0, 57) + "…" : s;
+}
+function linkWhen(iso){
+  var d = new Date(iso); return isNaN(d) ? "" : d.getDate() + " " + MON[d.getMonth()];
+}
+function linkBare(text){
+  var out = [], re = /https?:\/\/[^\s<>"']+/gi, m;
+  while((m = re.exec(String(text || "")))){
+    var u = m[0];
+    if(/(\.\.\.|…)$/.test(u)) continue; /* Monday's plain text cuts long addresses with "..." — the HTML has the full one */
+    u = u.replace(/[.,;:!?]+$/, "");
+    if(/\)$/.test(u) && u.indexOf("(") < 0) u = u.slice(0, -1);
+    out.push(u);
+  }
+  return out;
+}
+function collectTaskLinks(it){
+  var list = [], seen = {};
+  function add(url, label, from){
+    url = String(url || "").replace(/&amp;/g, "&").trim();
+    if(!/^https?:\/\//i.test(url) || /\.monday\.com\/users\/\d+/i.test(url)) return; /* web links only; skip @mention/profile links */
+    var k = linkKey(url); if(seen[k]) return; seen[k] = 1;
+    label = linkUnHtml(label);
+    if(!label || /^https?:\/\//i.test(label) || label.length > 120) label = linkShort(url);
+    list.push({url:url, label:label, from:from});
+  }
+  function fromHtml(html, from){
+    var re = /<a\b[^>]*?\bhref\s*=\s*(?:"([^"]*)"|'([^']*)')[^>]*>([\s\S]*?)<\/a>/gi, m;
+    while((m = re.exec(String(html || "")))) add(m[1] || m[2], m[3], from);
+    linkBare(linkUnHtml(html)).forEach(function(u){ add(u, "", from); });
+  }
+  function who(c){ return ((c && c.name) || "").split(" ")[0]; }
+  var cols = it.column_values || [];
+  var linkCols = cols.filter(function(c){ return c.url || (c.column && c.column.type === "link"); });
+  linkCols.sort(function(a, b){ return (b.column && b.column.title === COL.link ? 1 : 0) - (a.column && a.column.title === COL.link ? 1 : 0); });
+  linkCols.forEach(function(c){ if(c.url) add(c.url, c.url_text, (c.column && c.column.title) || "Link"); });
+  cols.forEach(function(c){
+    if(linkCols.indexOf(c) >= 0) return;
+    linkBare([c.text, c.display_value].join(" ")).forEach(function(u){ add(u, "", (c.column && c.column.title) || c.id); });
+  });
+  (it.updates || []).slice().sort(function(a, b){ return String(b.created_at).localeCompare(String(a.created_at)); }).forEach(function(u){
+    var from = "update · " + linkWhen(u.created_at) + (who(u.creator) ? " · " + who(u.creator) : "");
+    fromHtml(u.body, from);
+    linkBare(u.text_body).forEach(function(x){ add(x, "", from); });
+    (u.assets || []).forEach(function(f){ add(f.url || f.public_url, f.name, from + " · file"); });
+    (u.replies || []).slice().sort(function(a, b){ return String(b.created_at).localeCompare(String(a.created_at)); }).forEach(function(r){
+      var rf = "reply · " + linkWhen(r.created_at) + (who(r.creator) ? " · " + who(r.creator) : "");
+      fromHtml(r.body, rf);
+      linkBare(r.text_body).forEach(function(x){ add(x, "", rf); });
+    });
+  });
+  return list;
+}
+function linksBlock(a){
+  if(!a || !a.links || !a.links.length) return "";
+  return '<div class="links"><b>Links</b>' + a.links.map(function(l){
+    return '<div class="ln"><a href="' + esc(l.url) + '" target="_blank" rel="noopener">' + esc(l.label) + '</a> <span class="lsrc">· ' + esc(l.from) + "</span></div>";
+  }).join("") + "</div>";
 }
 function askTask(id, mode){
   var d = BY_ID[id];
@@ -1045,8 +1133,8 @@ function askTask(id, mode){
   if(a && a.state === "loading") return;
   TASK_ASK[key] = {state:"loading", text:"Reading the Monday item…", open:true}; render();
   gql("query { items(ids:[" + id + "]) { name url created_at board { name } group { title } parent_item { name url } " +
-      "column_values { id text ... on MirrorValue { display_value } ... on LinkValue { url } column { title } } " +
-      "updates(limit:12) { text_body created_at creator { name } } " +
+      "column_values { id text ... on MirrorValue { display_value } ... on LinkValue { url url_text } column { title type } } " +
+      "updates(limit:25) { body text_body created_at creator { name } assets { name url public_url } replies { body text_body created_at creator { name } } } " +
       "subitems { name column_values(types:[status]) { text column { title } } } } }")
     .then(function(res){
       var it = (res.items || [])[0]; if(!it) throw {code:"tool_error", message:"Item not found"};
@@ -1054,7 +1142,8 @@ function askTask(id, mode){
         var v = c.text || c.display_value || c.url || ""; return v ? ((c.column && c.column.title) || c.id) + ": " + v : null;
       }).filter(Boolean);
       var ups = (it.updates || []).map(function(u){
-        return "- " + String(u.created_at || "").slice(0,10) + " " + ((u.creator && u.creator.name) || "") + ": " + String(u.text_body || "").replace(/\s+/g, " ").slice(0, 900);
+        return "- " + String(u.created_at || "").slice(0,10) + " " + ((u.creator && u.creator.name) || "") + ": " + String(u.text_body || "").replace(/\s+/g, " ").slice(0, 900) +
+          (u.replies || []).map(function(r){ return "\n  reply " + String(r.created_at || "").slice(0,10) + " " + ((r.creator && r.creator.name) || "") + ": " + String(r.text_body || "").replace(/\s+/g, " ").slice(0, 600); }).join("");
       });
       var subs = (it.subitems || []).map(function(s){
         var st = (s.column_values || []).filter(function(c){ return c.column && /^(CEO )?Status$/.test(c.column.title); }).map(function(c){ return c.text; }).filter(Boolean).join(", ");
@@ -1071,11 +1160,12 @@ function askTask(id, mode){
         "Write for Gordon, plain English, no preamble, under 130 words, exactly these headings on their own lines:\n" +
         "What this is about\n(two or three sentences: what it is, who logged it and why, where it stands)\n\n" +
         "What's needed from you\n(the specific decision, reply or action; any due date; who is waiting. If the item gives too little to say, say so plainly and suggest he asks the person who logged it.)\n\n" +
-        "If there is a link, end with one line: Link: <url>. Plain text, no markdown.\n\n=== MONDAY ITEM ===\n" + body;
+        "Do not list links or web addresses; the page shows them separately. Plain text, no markdown.\n\n=== MONDAY ITEM ===\n" + body;
+      TASK_ASK[key].links = collectTaskLinks(it);
       TASK_ASK[key].text = "Thinking…"; render();
-      return SAMPLE(prompt, {modelTier:"quick", onText:function(t){ TASK_ASK[key].text = t.text; render(); }});
+      return SAMPLE(prompt, {modelTier:"quick", onText:function(t){ TASK_ASK[key].text = t.text; renderSoft(); }});
     })
-    .then(function(res){ TASK_ASK[key] = {state:"ok", text:res.text, open:true}; render(); })
+    .then(function(res){ TASK_ASK[key] = {state:"ok", text:res.text, open:true, links:(TASK_ASK[key] && TASK_ASK[key].links) || []}; render(); })
     .catch(function(e){
       var code = e && e.code, msg;
       if(code === "not_granted") msg = "Claude wasn't allowed for this page. Allow it when asked, then try again.";
@@ -1095,7 +1185,7 @@ function assignedPrompt(body){
     "Who has it\n(the person, their Status, the due date and whether it is late)\n\n" +
     "Where it stands\n(what their latest updates say, with dates; if they have posted no updates, say so plainly and how long ago the item was created)\n\n" +
     "Anything waiting on you\n(a question or decision they raised for Gordon, or 'Nothing right now'; if it looks finished, say he can mark it CEO Done)\n\n" +
-    "Plain text, no markdown.\n\n=== MONDAY ITEM ===\n" + body;
+    "Do not list links or web addresses; the page shows them separately. Plain text, no markdown.\n\n=== MONDAY ITEM ===\n" + body;
 }
 function askMail(id){
   var m = MAIL.items.filter(function(x){ return x.id === id; })[0];
@@ -1120,7 +1210,7 @@ function askMail(id){
         "If Gordon already answered and nothing is pending for him, say 'Nothing needed from you right now' and why.)\n\n" +
         "Plain text only, no markdown.\n\n=== THREAD ===\n" + body;
       ASK[id].text = "Thinking…"; render();
-      return SAMPLE(prompt, {modelTier:"quick", onText:function(t){ ASK[id].text = t.text; render(); }});
+      return SAMPLE(prompt, {modelTier:"quick", onText:function(t){ ASK[id].text = t.text; renderSoft(); }});
     })
     .then(function(res){ ASK[id] = {state:"ok", text:res.text, open:true}; render(); })
     .catch(function(e){
@@ -1512,9 +1602,9 @@ function pipeRail(){
 /* ============================ views ============================ */
 var VIEWS = [
   {k:"today", label:"Today",
-   desc:"What needs you today — tasks due or overdue, what you are already working on, and what lands within three days."},
+   desc:"What needs you today — tasks due or overdue, and what lands within three days."},
   {k:"week", label:"What's coming",
-   desc:"Dated tasks for the next fortnight, grouped by the day they fall due."},
+   desc:"Dated tasks for the next fortnight, grouped by the day they fall due. Tasks with no date yet are listed at the end."},
   {k:"projects", label:"Projects",
    desc:"Work with an end date."},
   {k:"open", label:"Open files",
@@ -1533,7 +1623,7 @@ var VIEWS = [
 function countFor(k){
   if(!LOADED) return "";
   var a = actions();
-  if(k === "today") return a.filter(function(d){ var n = days(d.due); return (n !== null && n <= 0) || d.ceo === "CEO Working On It"; }).length;
+  if(k === "today") return a.filter(function(d){ var n = days(d.due); return n !== null && n <= 0; }).length;
   if(k === "week") return a.filter(function(d){ var n = days(d.due); return n !== null && n >= 0 && n <= 14; }).length;
   if(k === "projects") return visible().filter(function(d){ return d.work === "Project"; }).length;
   if(k === "open") return visible().filter(function(d){ return d.work === "Open File"; }).length;
@@ -1548,12 +1638,10 @@ function viewBody(k){
   if(k === "today"){
     var a = actions();
     var dueNow = a.filter(function(d){ var n = days(d.due); return n !== null && n <= 0; });
-    var working = a.filter(function(d){ return d.ceo === "CEO Working On It"; });
     var soon = a.filter(function(d){ var n = days(d.due); return n !== null && n > 0 && n <= 3; });
     return mailSection() +
       calSection("today") +
       sec("Due today &amp; overdue", dueNow.length, "tasks only", flatList(dueNow, "Nothing is due today.")) +
-      sec("You're already working on these", working.length, "CEO Working On It", flatList(working, "Nothing marked as in progress.")) +
       sec("Upcoming tasks in the next 3 days", soon.length, "", flatList(soon, "Clear for the next three days."));
   }
   if(k === "week"){
@@ -1561,6 +1649,7 @@ function viewBody(k){
     var past = a2.filter(function(d){ var n = days(d.due); return n !== null && n < 0; });
     var win = a2.filter(function(d){ var n = days(d.due); return n !== null && n >= 0 && n <= 14; });
     var later = a2.filter(function(d){ var n = days(d.due); return n !== null && n > 14; });
+    var nodate = a2.filter(function(d){ return days(d.due) === null; });
     var body;
     if(!win.length){ body = '<div class="list"><div class="empty">Nothing dated in the next fourteen days.</div></div>'; }
     else {
@@ -1577,7 +1666,8 @@ function viewBody(k){
     return calSection("week") +
       (past.length ? sec("Still open from earlier", past.length, "", flatList(past, "")) : "") +
       sec("Next fourteen days", win.length, "grouped by due date", body) +
-      sec("Further out", later.length, "", flatList(later, "Nothing dated beyond two weeks."));
+      sec("Further out", later.length, "", flatList(later, "Nothing dated beyond two weeks.")) +
+      sec("No date", nodate.length, "tasks with no due date yet", flatList(nodate, "Every task has a date."));
   }
   if(k === "projects"){
     var projs = visible().filter(function(d){ return d.work === "Project"; });
