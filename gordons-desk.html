@@ -197,6 +197,16 @@ select.stsel option{background:var(--surface);color:var(--ink)}
 .stmsg.err{color:var(--late-fg);font-family:var(--f-body);font-weight:500;letter-spacing:0}
 .stmsg.ok{color:var(--ok-fg)}
 .stpill{display:inline-flex;align-items:center;font-size:11.5px;font-weight:600;border-radius:999px;padding:4px 9px;white-space:nowrap}
+.duebox{display:flex;flex-direction:column;gap:3px;align-items:flex-start;min-width:0}
+.duebtn{border:0;background:none;padding:0;font:inherit;color:inherit;cursor:pointer;text-align:left}
+.duebtn:hover .due{text-decoration:underline dotted}
+.duebtn .pen{font-size:10.5px;color:var(--ink3);margin-left:5px}
+.duebtn:hover .pen{color:var(--accent)}
+.dueedit{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.dueedit input[type=date]{font:inherit;font-size:12px;padding:2px 4px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);max-width:146px}
+.dueedit button{font-size:11px;font-weight:600;border:0;border-radius:6px;padding:2px 8px;background:var(--sunk);color:var(--ink2);cursor:pointer}
+.dueedit button.go{background:var(--accent);color:#fff}
+.dueedit button:disabled{opacity:.5;cursor:default}
 
 .due{font-family:var(--f-mono);font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--ink2);white-space:normal;line-height:1.3;display:inline-block}
 .due.late{color:var(--late-fg);font-weight:500}
@@ -252,6 +262,10 @@ select.stsel option{background:var(--surface);color:var(--ink)}
 .m-ask .box b:first-child{margin-top:0}
 .m-ask .box.think{color:var(--ink3);font-style:italic}
 .m-ask .box.bad{background:var(--late-bg);color:var(--late-fg)}
+.m-ask .links{margin-top:8px;padding:10px 14px;border:1px solid var(--accent-soft);border-radius:10px;overflow-wrap:anywhere}
+.m-ask .links b{display:block;margin-bottom:4px}
+.m-ask .links .ln{padding:2px 0}
+.m-ask .links .lsrc{color:var(--ink3);font-size:12.5px}
 @media (max-width:640px){ .mrow{grid-template-columns:minmax(0,1fr) 32px} .mrow .tag.ask{grid-column:1;justify-self:start} .mrow .open{grid-column:2;grid-row:1} }
 .tag.plus{background:var(--sunk);color:var(--ink2);cursor:pointer;border:0;font:inherit;font-size:11px;font-weight:600;white-space:nowrap}
 .tag.plus:hover{color:var(--accent);background:var(--accent-soft)}
@@ -325,6 +339,24 @@ select.stsel option{background:var(--surface);color:var(--ink)}
   .row.nested.lv2{--ind:58px}
   .band.grp{padding-left:24px}
 }
+/* Marketing Trip Pipeline tab: wide tables scroll sideways inside their section */
+.pwrap{overflow-x:auto}
+.ptab{width:100%;border-collapse:collapse;min-width:680px}
+.ptab th{background:var(--sunk);border-bottom:1px solid var(--line);padding:0 12px;text-align:left;vertical-align:bottom}
+.ptab th:first-child,.ptab td:first-child{padding-left:14px}
+.ptab th button{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:600;color:var(--ink3);
+  background:none;border:0;padding:9px 0;text-align:left;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.ptab th button:hover{color:var(--ink)}
+.ptab th button.on{color:var(--accent)}
+.ptab th .arrow{font-size:9px}
+.ptab td{padding:9px 12px;border-top:1px solid var(--line);vertical-align:middle;white-space:nowrap;font-size:13.5px;color:var(--ink2)}
+.ptab tbody tr:first-child td{border-top:0}
+.ptab tbody tr:hover td{background:color-mix(in srgb,var(--sunk) 45%,transparent)}
+.ptab td.pname{white-space:normal;min-width:220px;overflow-wrap:anywhere}
+.ptab td.pname a{font-weight:600;font-size:14.5px;color:var(--ink);text-decoration:none}
+.ptab td.pname a:hover{text-decoration:underline;text-decoration-color:var(--ink3)}
+.ptab td.pdate{font-family:var(--f-mono);font-size:12.5px;font-variant-numeric:tabular-nums}
+.ptab td.pnone{color:var(--ink3)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -372,7 +404,7 @@ select.stsel option{background:var(--surface);color:var(--ink)}
   <footer class="foot">
     <span id="foot-1">Read live each time this page opens: every Monday board with a CEO Status column (plus anything Gordon logged for someone else), the Gmail threads under GD To Check, and the calendar for the fortnight ahead. Click any heading to fold it away.</span>
     <span>Shows anything assigned to Gordon, or carrying a CEO Status. Finished work moves to Completed. Items at Request for CEO wait for the assistant's triage and are not shown here.</span>
-    <label class="aswitch" title="For the assistant: adds a + Task button on each email that creates the item on Monday"><input type="checkbox" id="assist-toggle"> <span id="assist-label">Assistant tools</span></label>
+    <label class="aswitch" title="For the assistant: adds a + Task button on each email that creates the item on Monday, and lets due dates be changed on Monday"><input type="checkbox" id="assist-toggle"> <span id="assist-label">Assistant tools</span></label>
     <span id="foot-ver" class="foot-ver" title="Version of the dashboard script this page is running"></span>
   </footer>
 </div>
@@ -656,7 +688,7 @@ function loadBoard(b){
         status: get(COL.status), golive: get(COL.golive), link: get(COL.link),
         task: get(COL.task) || get(COL.task2),
         logged: get(COL.logged) || get(COL.logged2),
-        ceoCol: b.cols[COL.ceo]
+        ceoCol: b.cols[COL.ceo], dueCol: b.cols[COL.due] || ""
       };
     }
   }).catch(function(err){
@@ -677,6 +709,7 @@ function chunkRun(list, size, fn){
 function load(){
   if(LOADING) return;
   LOADING = true; LOAD_ERR = null;
+  pipeReset();
   el("refresh").disabled = true;
   el("refresh").querySelector("svg").classList.add("spin");
   el("sync-line").textContent = "reading Monday…";
@@ -880,7 +913,7 @@ function row(n, depth, opts){
     "</div>" +
     '<div class="r-type"><span class="type t-' + String(o.work || "").replace(/\s/g,"") + '">' + esc(WORK_LABEL[o.work] || (d ? "—" : "parent")) + "</span></div>" +
     (d ? statusSelect(d) : '<div class="stcell"><span class="stpill v-none">not his item</span></div>') +
-    '<div class="r-due">' + (d ? dueCell(d) : "") + "</div>" +
+    '<div class="r-due">' + (d ? dueEditCell(d) : "") + "</div>" +
     '<a class="open" href="' + esc(o.url || "#") + '" target="_blank" rel="noopener" title="Open in Monday" aria-label="Open in Monday">' +
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg></a>' +
     "</div>";
@@ -994,6 +1027,19 @@ function srcState(src, server, label){
   }
   return null;
 }
+/* While a brief streams, redraw at most every 200 ms and never between mouse-down and mouse-up,
+   so a click on another control is not lost when the row under it is replaced (1.3.0). */
+var PTR_DOWN = false, SOFT_T = null;
+document.addEventListener("pointerdown", function(){ PTR_DOWN = true; }, true);
+document.addEventListener("pointerup", function(){ PTR_DOWN = false; }, true);
+document.addEventListener("pointercancel", function(){ PTR_DOWN = false; }, true);
+function renderSoft(){
+  if(SOFT_T) return;
+  SOFT_T = setTimeout(function tick(){
+    if(PTR_DOWN){ SOFT_T = setTimeout(tick, 120); return; }
+    SOFT_T = null; render();
+  }, 200);
+}
 function askPanel(a){
   if(!a || (a.state === "ok" && !a.open)) return "";
   if(a.state === "loading") return '<div class="m-ask"><div class="box think">' + esc(a.text || "Reading the thread…") + "</div></div>";
@@ -1001,11 +1047,82 @@ function askPanel(a){
   var t = esc(a.text).replace(/^(What this is about|What.s needed from you|Nothing needed from you|Who has it|Where it stands|Anything waiting on you)[:.]?\s*$/gim, "<b>$1</b>")
                      .replace(/^\*\*(.+?)\*\*:?\s*$/gm, "<b>$1</b>").replace(/\*\*/g, "")
                      .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
-  return '<div class="m-ask"><div class="box">' + t + "</div></div>";
+  return '<div class="m-ask"><div class="box">' + t + "</div>" + linksBlock(a) + "</div>";
 }
 function cleanBody(s){
   return String(s || "").split("\n").filter(function(l){ return !/^\s*>/.test(l); }).join("\n")
     .replace(/\n{3,}/g, "\n\n").replace(/\[image:[^\]]*\]/g, "").trim().slice(0, 6000);
+}
+/* ---- Ask Claude links (1.3): collected in code from columns, updates, replies and files ---- */
+function linkUnHtml(s){
+  return String(s || "").replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&#(\d+);/g, function(m, n){ return String.fromCharCode(+n); })
+    .replace(/&#x([0-9a-f]+);/gi, function(m, n){ return String.fromCharCode(parseInt(n, 16)); }).replace(/&amp;/g, "&")
+    .replace(/[​-‍﻿]/g, "").replace(/\s+/g, " ").trim();
+}
+function linkKey(u){
+  return String(u).trim().replace(/^http:\/\//i, "https://").replace(/^https:\/\/www\./i, "https://").replace(/#$/, "").replace(/\/+(?=$|[?#])/, "").replace(/^https:\/\/[^\/?#]+/i, function(h){ return h.toLowerCase(); });
+}
+function linkShort(u){
+  var m = /^https?:\/\/(?:www\.)?([^\/?#]+)([^?#]*)/i.exec(u), s = m ? m[1] + m[2].replace(/\/+$/, "") : u;
+  return s.length > 60 ? s.slice(0, 57) + "…" : s;
+}
+function linkWhen(iso){
+  var d = new Date(iso); return isNaN(d) ? "" : d.getDate() + " " + MON[d.getMonth()];
+}
+function linkBare(text){
+  var out = [], re = /https?:\/\/[^\s<>"']+/gi, m;
+  while((m = re.exec(String(text || "")))){
+    var u = m[0];
+    if(/(\.\.\.|…)$/.test(u)) continue; /* Monday's plain text cuts long addresses with "..." — the HTML has the full one */
+    u = u.replace(/[.,;:!?]+$/, "");
+    if(/\)$/.test(u) && u.indexOf("(") < 0) u = u.slice(0, -1);
+    out.push(u);
+  }
+  return out;
+}
+function collectTaskLinks(it){
+  var list = [], seen = {};
+  function add(url, label, from){
+    url = String(url || "").replace(/&amp;/g, "&").trim();
+    if(!/^https?:\/\//i.test(url) || /\.monday\.com\/users\/\d+/i.test(url)) return; /* web links only; skip @mention/profile links */
+    var k = linkKey(url); if(seen[k]) return; seen[k] = 1;
+    label = linkUnHtml(label);
+    if(!label || /^https?:\/\//i.test(label) || label.length > 120) label = linkShort(url);
+    list.push({url:url, label:label, from:from});
+  }
+  function fromHtml(html, from){
+    var re = /<a\b[^>]*?\bhref\s*=\s*(?:"([^"]*)"|'([^']*)')[^>]*>([\s\S]*?)<\/a>/gi, m;
+    while((m = re.exec(String(html || "")))) add(m[1] || m[2], m[3], from);
+    linkBare(linkUnHtml(html)).forEach(function(u){ add(u, "", from); });
+  }
+  function who(c){ return ((c && c.name) || "").split(" ")[0]; }
+  var cols = it.column_values || [];
+  var linkCols = cols.filter(function(c){ return c.url || (c.column && c.column.type === "link"); });
+  linkCols.sort(function(a, b){ return (b.column && b.column.title === COL.link ? 1 : 0) - (a.column && a.column.title === COL.link ? 1 : 0); });
+  linkCols.forEach(function(c){ if(c.url) add(c.url, c.url_text, (c.column && c.column.title) || "Link"); });
+  cols.forEach(function(c){
+    if(linkCols.indexOf(c) >= 0) return;
+    linkBare([c.text, c.display_value].join(" ")).forEach(function(u){ add(u, "", (c.column && c.column.title) || c.id); });
+  });
+  (it.updates || []).slice().sort(function(a, b){ return String(b.created_at).localeCompare(String(a.created_at)); }).forEach(function(u){
+    var from = "update · " + linkWhen(u.created_at) + (who(u.creator) ? " · " + who(u.creator) : "");
+    fromHtml(u.body, from);
+    linkBare(u.text_body).forEach(function(x){ add(x, "", from); });
+    (u.assets || []).forEach(function(f){ add(f.url || f.public_url, f.name, from + " · file"); });
+    (u.replies || []).slice().sort(function(a, b){ return String(b.created_at).localeCompare(String(a.created_at)); }).forEach(function(r){
+      var rf = "reply · " + linkWhen(r.created_at) + (who(r.creator) ? " · " + who(r.creator) : "");
+      fromHtml(r.body, rf);
+      linkBare(r.text_body).forEach(function(x){ add(x, "", rf); });
+    });
+  });
+  return list;
+}
+function linksBlock(a){
+  if(!a || !a.links || !a.links.length) return "";
+  return '<div class="links"><b>Links</b>' + a.links.map(function(l){
+    return '<div class="ln"><a href="' + esc(l.url) + '" target="_blank" rel="noopener">' + esc(l.label) + '</a> <span class="lsrc">· ' + esc(l.from) + "</span></div>";
+  }).join("") + "</div>";
 }
 function askTask(id, mode){
   var d = BY_ID[id];
@@ -1016,8 +1133,8 @@ function askTask(id, mode){
   if(a && a.state === "loading") return;
   TASK_ASK[key] = {state:"loading", text:"Reading the Monday item…", open:true}; render();
   gql("query { items(ids:[" + id + "]) { name url created_at board { name } group { title } parent_item { name url } " +
-      "column_values { id text ... on MirrorValue { display_value } ... on LinkValue { url } column { title } } " +
-      "updates(limit:12) { text_body created_at creator { name } } " +
+      "column_values { id text ... on MirrorValue { display_value } ... on LinkValue { url url_text } column { title type } } " +
+      "updates(limit:25) { body text_body created_at creator { name } assets { name url public_url } replies { body text_body created_at creator { name } } } " +
       "subitems { name column_values(types:[status]) { text column { title } } } } }")
     .then(function(res){
       var it = (res.items || [])[0]; if(!it) throw {code:"tool_error", message:"Item not found"};
@@ -1025,7 +1142,8 @@ function askTask(id, mode){
         var v = c.text || c.display_value || c.url || ""; return v ? ((c.column && c.column.title) || c.id) + ": " + v : null;
       }).filter(Boolean);
       var ups = (it.updates || []).map(function(u){
-        return "- " + String(u.created_at || "").slice(0,10) + " " + ((u.creator && u.creator.name) || "") + ": " + String(u.text_body || "").replace(/\s+/g, " ").slice(0, 900);
+        return "- " + String(u.created_at || "").slice(0,10) + " " + ((u.creator && u.creator.name) || "") + ": " + String(u.text_body || "").replace(/\s+/g, " ").slice(0, 900) +
+          (u.replies || []).map(function(r){ return "\n  reply " + String(r.created_at || "").slice(0,10) + " " + ((r.creator && r.creator.name) || "") + ": " + String(r.text_body || "").replace(/\s+/g, " ").slice(0, 600); }).join("");
       });
       var subs = (it.subitems || []).map(function(s){
         var st = (s.column_values || []).filter(function(c){ return c.column && /^(CEO )?Status$/.test(c.column.title); }).map(function(c){ return c.text; }).filter(Boolean).join(", ");
@@ -1042,11 +1160,12 @@ function askTask(id, mode){
         "Write for Gordon, plain English, no preamble, under 130 words, exactly these headings on their own lines:\n" +
         "What this is about\n(two or three sentences: what it is, who logged it and why, where it stands)\n\n" +
         "What's needed from you\n(the specific decision, reply or action; any due date; who is waiting. If the item gives too little to say, say so plainly and suggest he asks the person who logged it.)\n\n" +
-        "If there is a link, end with one line: Link: <url>. Plain text, no markdown.\n\n=== MONDAY ITEM ===\n" + body;
+        "Do not list links or web addresses; the page shows them separately. Plain text, no markdown.\n\n=== MONDAY ITEM ===\n" + body;
+      TASK_ASK[key].links = collectTaskLinks(it);
       TASK_ASK[key].text = "Thinking…"; render();
-      return SAMPLE(prompt, {modelTier:"quick", onText:function(t){ TASK_ASK[key].text = t.text; render(); }});
+      return SAMPLE(prompt, {modelTier:"quick", onText:function(t){ TASK_ASK[key].text = t.text; renderSoft(); }});
     })
-    .then(function(res){ TASK_ASK[key] = {state:"ok", text:res.text, open:true}; render(); })
+    .then(function(res){ TASK_ASK[key] = {state:"ok", text:res.text, open:true, links:(TASK_ASK[key] && TASK_ASK[key].links) || []}; render(); })
     .catch(function(e){
       var code = e && e.code, msg;
       if(code === "not_granted") msg = "Claude wasn't allowed for this page. Allow it when asked, then try again.";
@@ -1066,7 +1185,7 @@ function assignedPrompt(body){
     "Who has it\n(the person, their Status, the due date and whether it is late)\n\n" +
     "Where it stands\n(what their latest updates say, with dates; if they have posted no updates, say so plainly and how long ago the item was created)\n\n" +
     "Anything waiting on you\n(a question or decision they raised for Gordon, or 'Nothing right now'; if it looks finished, say he can mark it CEO Done)\n\n" +
-    "Plain text, no markdown.\n\n=== MONDAY ITEM ===\n" + body;
+    "Do not list links or web addresses; the page shows them separately. Plain text, no markdown.\n\n=== MONDAY ITEM ===\n" + body;
 }
 function askMail(id){
   var m = MAIL.items.filter(function(x){ return x.id === id; })[0];
@@ -1091,7 +1210,7 @@ function askMail(id){
         "If Gordon already answered and nothing is pending for him, say 'Nothing needed from you right now' and why.)\n\n" +
         "Plain text only, no markdown.\n\n=== THREAD ===\n" + body;
       ASK[id].text = "Thinking…"; render();
-      return SAMPLE(prompt, {modelTier:"quick", onText:function(t){ ASK[id].text = t.text; render(); }});
+      return SAMPLE(prompt, {modelTier:"quick", onText:function(t){ ASK[id].text = t.text; renderSoft(); }});
     })
     .then(function(res){ ASK[id] = {state:"ok", text:res.text, open:true}; render(); })
     .catch(function(e){
@@ -1310,12 +1429,182 @@ function calSection(mode){
   return sec("The week ahead", week.length, "", '<div class="list">' + out + "</div>");
 }
 
+/* ============================ Marketing Trip Pipeline ============================ */
+/* Read-only copy of the Monday dashboard "Marketing Trip Pipeline" (id 40591241): three boards, same filters, same columns.
+   Fetched the first time the tab is opened; Refresh re-reads it. Each section loads (and fails) on its own. */
+var PIPE = {state:"idle", secs:{}, run:0};
+var PIPE_SORT = {}; /* section key -> {c: column index, dir: 1|-1} */
+function pipeToday(){ var d = new Date(); return d.getFullYear() + "-" + pad2(d.getMonth()+1) + "-" + pad2(d.getDate()); }
+var PIPE_SECS = [
+  {key:"mkt", title:"With Marketing: awaiting release", board:4881054300,
+   noGroups:["new_group39787","new_group59160"],
+   rules:function(){ return '{column_id:"group", compare_value:["new_group39787","new_group59160"], operator:not_any_of}'; },
+   groups:function(t){ return '[{operator:or, rules:[{column_id:"date__1", compare_value:[], operator:is_empty},' +
+     '{column_id:"date__1", compare_value:["EXACT","' + t + '"], operator:greater_than_or_equals}]}]'; },
+   keep:function(r, t){ var v = r.v.date__1; return !v || v >= t; },
+   cols:[{id:"", t:"Item", k:"name"}, {id:"mirror_2", t:"Trip Dates", k:"range"}, {id:"mirror_3", t:"Trip Code", k:"text"},
+         {id:"date44", t:"CI Received", k:"date"}, {id:"date__1", t:"Newsletter Release Date", k:"date"}],
+   sort:{c:3, dir:1}},
+  {key:"prod", title:"Arriving next (Trip Production)", board:4183354747,
+   noGroups:["new_group7989","new_group34719"],
+   rules:function(){ return '{column_id:"date9", compare_value:[], operator:is_empty},' +
+     '{column_id:"group", compare_value:["new_group7989","new_group34719"], operator:not_any_of}'; },
+   keep:function(r){ return !r.v.date9; },
+   cols:[{id:"", t:"Item", k:"name"}, {id:"people7", t:"Ops", k:"text"}, {id:"mirror45", t:"Trip Dates", k:"range"},
+         {id:"mirror93", t:"Trip Code", k:"text"}, {id:"date3", t:"CI Itinerary Ready By", k:"date"},
+         {id:"status52", t:"Content Itinerary", k:"status"}, {id:"date9", t:"CI Sent to MKT", k:"date"}],
+   sort:{c:4, dir:1}},
+  {key:"plan", title:"Further out (Trip Planning)", board:8803642475,
+   noGroups:["group_mkpmk991","group_mkpf2t4y","group_mkrmfqq6"],
+   rules:function(){ return '{column_id:"group", compare_value:["group_mkpmk991","group_mkpf2t4y","group_mkrmfqq6"], operator:not_any_of},' +
+     '{column_id:"date_mkv7w83f", compare_value:[], operator:is_not_empty}'; },
+   keep:function(r){ return !!r.v.date_mkv7w83f; },
+   cols:[{id:"", t:"Item", k:"name"}, {id:"timerange_mkpfrece", t:"Trip Dates", k:"timeline"},
+         {id:"date_mkpf1pmw", t:"Month / Year", k:"date"}, {id:"date_mkv7p9bm", t:"20-Month Mark (Auto)", k:"date"},
+         {id:"date_mkv7w83f", t:"18-Month Mark (Auto)", k:"date"}],
+   sort:{c:4, dir:1}}
+];
+var PIPE_TRIPCODE = {mkt:"mirror_3", prod:"mirror93"};
+function pipeFields(s){
+  var ids = s.cols.filter(function(c){ return c.id; }).map(function(c){ return '"' + c.id + '"'; }).join(",");
+  return ' cursor items { id name url group { id } column_values(ids:[' + ids + ']) { id text' +
+    ' ... on MirrorValue { display_value } ... on StatusValue { label label_style { color } } ... on TimelineValue { from to } } }';
+}
+function pipeMapItem(s, it){
+  var r = {id:it.id, name:it.name || "", url:it.url || "#", group:it.group ? it.group.id : "", v:{}, color:{}};
+  (it.column_values || []).forEach(function(c){
+    var v = c.text || c.display_value || c.label || "";
+    if(c.from !== undefined){ var a = c.from ? String(c.from).slice(0, 10) : "", b = c.to ? String(c.to).slice(0, 10) : "";
+      v = a ? a + (b ? " - " + b : "") : ""; }
+    r.v[c.id] = v;
+    if(c.label_style && c.label_style.color) r.color[c.id] = c.label_style.color;
+  });
+  return r;
+}
+/* Filters run in the Monday query; the page then checks the same rules again, so the result always equals the dashboard's filters. */
+function pipeFetch(s, t){
+  var rows = [], pages = 0;
+  var q = 'query { boards(ids:[' + s.board + ']) { items_page(limit:200, query_params:{operator:and, rules:[' + s.rules() + ']' +
+    (s.groups ? ', groups:' + s.groups(t) : '') + '}) {' + pipeFields(s) + ' } } }';
+  function take(page){
+    ((page && page.items) || []).forEach(function(it){
+      var r = pipeMapItem(s, it);
+      if(s.noGroups.indexOf(r.group) === -1 && s.keep(r, t)) rows.push(r);
+    });
+    pages++;
+    if(page && page.cursor && pages < 25)
+      return gql('query ($c:String!) { next_items_page(limit:200, cursor:$c) {' + pipeFields(s) + ' } }', {c:page.cursor})
+        .then(function(d){ return take(d && d.next_items_page); });
+    return rows;
+  }
+  return gql(q).then(function(d){
+    var b = (d && d.boards || [])[0];
+    if(!b) throw {code:"tool_error", message:"Monday did not return the board. The Monday account connected here may not have access to it."};
+    return take(b.items_page);
+  });
+}
+function pipeReset(){ PIPE = {state:"idle", secs:{}, run:PIPE.run + 1}; }
+function loadPipeline(){
+  var run = PIPE.run + 1, t = pipeToday();
+  PIPE = {state:"loading", secs:{}, run:run};
+  if(!MCP){ PIPE_SECS.forEach(function(s){ PIPE.secs[s.key] = {state:"error", err:{code:"not_granted"}}; }); PIPE.state = "ok"; return; }
+  Promise.all(PIPE_SECS.map(function(s){
+    return pipeFetch(s, t).then(function(rows){ return {state:"ok", rows:rows}; },
+      function(err){ return {state:"error", err:err}; })
+      .then(function(res){ if(PIPE.run !== run) return; PIPE.secs[s.key] = res; if(LOADED) render(); });
+  })).then(function(){ if(PIPE.run !== run) return; PIPE.state = "ok"; if(LOADED) render(); });
+}
+function pipeMatch(s, r){
+  if(!F.search) return true;
+  var q = F.search.toLowerCase();
+  return (r.name + " " + (PIPE_TRIPCODE[s.key] ? r.v[PIPE_TRIPCODE[s.key]] || "" : "")).toLowerCase().indexOf(q) !== -1;
+}
+function pipeRows(s){ var st = PIPE.secs[s.key]; return st && st.state === "ok" ? st.rows.filter(function(r){ return pipeMatch(s, r); }) : null; }
+function pipeCount(){
+  if(PIPE.state !== "ok") return "";
+  var n = 0, any = false;
+  PIPE_SECS.forEach(function(s){ var rows = pipeRows(s); if(rows){ any = true; n += rows.length; } });
+  return any ? n : "";
+}
+/* Sort key: dates and timelines as YYYY-MM-DD (timeline by its start), text case-insensitive; "" means empty and always sorts last. */
+function pipeKey(c, r){
+  if(c.k === "name") return r.name.toLowerCase();
+  var v = r.v[c.id] || "";
+  if(c.k === "date" || c.k === "range" || c.k === "timeline"){ var d = parseD(v); return d ? isoLocal(d).slice(0, 10) : ""; }
+  return String(v).toLowerCase();
+}
+function pipeDay(v){ var d = parseD(v); return d ? d.getDate() + " " + MON[d.getMonth()] + " " + d.getFullYear() : ""; }
+function pipeInk(hex){
+  var h = String(hex).replace("#", ""); if(h.length === 3) h = h.replace(/(.)/g, "$1$1");
+  var n = parseInt(h.slice(0, 6), 16); if(isNaN(n)) return "#fff";
+  var L = (0.299 * (n >> 16 & 255) + 0.587 * (n >> 8 & 255) + 0.114 * (n & 255)) / 255;
+  return L > 0.62 ? "#14222B" : "#fff";
+}
+function pipeCell(c, r){
+  var v = r.v[c.id] || "";
+  if(c.k === "name") return '<td class="pname"><a href="' + esc(r.url) + '" target="_blank" rel="noopener" title="Open in Monday">' + esc(r.name) + "</a></td>";
+  if(!v) return '<td class="pnone">' + (c.k === "timeline" ? "\u2013" : "") + "</td>";
+  if(c.k === "date") return '<td class="pdate">' + esc(pipeDay(v)) + "</td>";
+  if(c.k === "range" || c.k === "timeline") return '<td class="pdate">' + esc(fmtRange(v)) + "</td>";
+  if(c.k === "status"){
+    var col = /^#[0-9a-f]{3,8}$/i.test(r.color[c.id] || "") ? r.color[c.id] : "";
+    return '<td><span class="stpill' + (col ? "" : " v-none") + '"' + (col ? ' style="background:' + col + ";color:" + pipeInk(col) + '"' : "") + ">" + esc(v) + "</span></td>";
+  }
+  return "<td>" + esc(v) + "</td>";
+}
+function pipeTable(s, rows){
+  var so = PIPE_SORT[s.key] || s.sort, col = s.cols[so.c];
+  rows = rows.slice().sort(function(a, b){
+    var x = pipeKey(col, a), y = pipeKey(col, b);
+    if(x === "" && y === "") return a.name.localeCompare(b.name);
+    if(x === "") return 1;
+    if(y === "") return -1;
+    return (x < y ? -1 : x > y ? 1 : a.name.localeCompare(b.name)) * so.dir;
+  });
+  var head = "<thead><tr>" + s.cols.map(function(c, i){
+    var on = i === so.c;
+    return '<th><button type="button" class="' + (on ? "on" : "") + '" data-psort="' + s.key + ":" + i + '">' + esc(c.t) +
+      (on ? '<span class="arrow">' + (so.dir === 1 ? "\u25B2" : "\u25BC") + "</span>" : "") + "</button></th>";
+  }).join("") + "</tr></thead>";
+  return '<div class="list"><div class="pwrap"><table class="ptab">' + head + "<tbody>" +
+    rows.map(function(r){ return "<tr>" + s.cols.map(function(c){ return pipeCell(c, r); }).join("") + "</tr>"; }).join("") +
+    "</tbody></table></div></div>";
+}
+function pipeSort(v){
+  var p = String(v).split(":"), key = p[0], c = +p[1];
+  var s = PIPE_SECS.filter(function(x){ return x.key === key; })[0]; if(!s) return;
+  var so = PIPE_SORT[key] || s.sort;
+  PIPE_SORT[key] = so.c === c ? {c:c, dir:-so.dir} : {c:c, dir:1};
+  render();
+}
+function pipeBody(){
+  if(PIPE.state === "idle") loadPipeline();
+  return PIPE_SECS.map(function(s){
+    var st = PIPE.secs[s.key];
+    if(!st) return sec(esc(s.title), null, "", skelList(3), "pipe:" + s.key);
+    if(st.state === "error"){
+      var m = mcpMessage(st.err && st.err.code, st.err && st.err.message, MONDAY);
+      return sec(esc(s.title), null, "", '<div class="list"><div class="srcnote bad"><div><b>' + esc(m.t) + "</b>" + esc(m.m) + "</div></div></div>", "pipe:" + s.key);
+    }
+    var rows = pipeRows(s);
+    var body = rows.length ? pipeTable(s, rows) :
+      '<div class="list"><div class="empty">' + (F.search ? "No trips here match the search." : "Nothing in this section right now.") + "</div></div>";
+    return sec(esc(s.title), rows.length, F.search ? "of " + st.rows.length : "", body, "pipe:" + s.key);
+  }).join("");
+}
+/* The rail's area, project, CEO status and due filters do not apply to this tab; only the search box does. */
+function pipeRail(){
+  var on = current === "pipeline";
+  ["w-area","w-proj","w-ceo","w-due"].forEach(function(id){ var x = el(id); if(x) x.style.display = on ? "none" : ""; });
+  var nest = el("f-nest") && el("f-nest").closest("label"); if(nest) nest.style.display = on ? "none" : "";
+}
+
 /* ============================ views ============================ */
 var VIEWS = [
   {k:"today", label:"Today",
-   desc:"What needs you today — tasks due or overdue, what you are already working on, and what lands within three days."},
+   desc:"What needs you today — tasks due or overdue, and what lands within three days."},
   {k:"week", label:"What's coming",
-   desc:"Dated tasks for the next fortnight, grouped by the day they fall due."},
+   desc:"Dated tasks for the next fortnight, grouped by the day they fall due. Tasks with no date yet are listed at the end."},
   {k:"projects", label:"Projects",
    desc:"Work with an end date."},
   {k:"open", label:"Open files",
@@ -1326,13 +1615,15 @@ var VIEWS = [
    desc:"Everything still open, nested the way Monday holds it: area, then group, then project, then the items beneath it. Anything you have finished has moved to Completed."},
   {k:"assigned", label:"Assigned by Gordon",
    desc:"Tasks you logged on Monday and gave to someone else, which they have not marked Done yet. Their own Status shows where they are; Ask Claude reads their updates on Monday. When you are satisfied, set its CEO Status to CEO Done and it leaves this list."},
+  {k:"pipeline", label:"Marketing Trip Pipeline",
+   desc:"The trips on their way to Marketing, as the Monday dashboard Marketing Trip Pipeline shows them: those with Marketing awaiting release, those arriving next from Trip Production, and those further out in Trip Planning. Read-only; click a column heading to sort."},
   {k:"done", label:"Completed",
    desc:"What you have marked CEO Done and handed back to the assistant, and what she has since Closed."}
 ];
 function countFor(k){
   if(!LOADED) return "";
   var a = actions();
-  if(k === "today") return a.filter(function(d){ var n = days(d.due); return (n !== null && n <= 0) || d.ceo === "CEO Working On It"; }).length;
+  if(k === "today") return a.filter(function(d){ var n = days(d.due); return n !== null && n <= 0; }).length;
   if(k === "week") return a.filter(function(d){ var n = days(d.due); return n !== null && n >= 0 && n <= 14; }).length;
   if(k === "projects") return visible().filter(function(d){ return d.work === "Project"; }).length;
   if(k === "open") return visible().filter(function(d){ return d.work === "Open File"; }).length;
@@ -1340,18 +1631,17 @@ function countFor(k){
   if(k === "all") return visible().length;
   if(k === "assigned") return ITEMS.filter(function(d){ return assignedNow(d) && matchesFilters(d); }).length;
   if(k === "done") return ITEMS.filter(function(d){ return d.ceo === "CEO Done"; }).length;
+  if(k === "pipeline") return pipeCount();
   return "";
 }
 function viewBody(k){
   if(k === "today"){
     var a = actions();
     var dueNow = a.filter(function(d){ var n = days(d.due); return n !== null && n <= 0; });
-    var working = a.filter(function(d){ return d.ceo === "CEO Working On It"; });
     var soon = a.filter(function(d){ var n = days(d.due); return n !== null && n > 0 && n <= 3; });
     return mailSection() +
       calSection("today") +
       sec("Due today &amp; overdue", dueNow.length, "tasks only", flatList(dueNow, "Nothing is due today.")) +
-      sec("You're already working on these", working.length, "CEO Working On It", flatList(working, "Nothing marked as in progress.")) +
       sec("Upcoming tasks in the next 3 days", soon.length, "", flatList(soon, "Clear for the next three days."));
   }
   if(k === "week"){
@@ -1359,6 +1649,7 @@ function viewBody(k){
     var past = a2.filter(function(d){ var n = days(d.due); return n !== null && n < 0; });
     var win = a2.filter(function(d){ var n = days(d.due); return n !== null && n >= 0 && n <= 14; });
     var later = a2.filter(function(d){ var n = days(d.due); return n !== null && n > 14; });
+    var nodate = a2.filter(function(d){ return days(d.due) === null; });
     var body;
     if(!win.length){ body = '<div class="list"><div class="empty">Nothing dated in the next fourteen days.</div></div>'; }
     else {
@@ -1375,7 +1666,8 @@ function viewBody(k){
     return calSection("week") +
       (past.length ? sec("Still open from earlier", past.length, "", flatList(past, "")) : "") +
       sec("Next fourteen days", win.length, "grouped by due date", body) +
-      sec("Further out", later.length, "", flatList(later, "Nothing dated beyond two weeks."));
+      sec("Further out", later.length, "", flatList(later, "Nothing dated beyond two weeks.")) +
+      sec("No date", nodate.length, "tasks with no due date yet", flatList(nodate, "Every task has a date."));
   }
   if(k === "projects"){
     var projs = visible().filter(function(d){ return d.work === "Project"; });
@@ -1423,6 +1715,7 @@ function viewBody(k){
       sec("Closed", closed.length, "most recently updated first",
         flatList(closed, "Nothing closed yet."));
   }
+  if(k === "pipeline") return pipeBody();
   return "";
 }
 
@@ -1470,6 +1763,7 @@ function renderNotice(){
   n.innerHTML = "";
 }
 function render(){
+  if(dueHold()) return; DUE_HELD = false;
   renderTabs(); renderStrip(); renderNotice();
   el("rail").hidden = !LOADED;
   var host = el("views");
@@ -1484,6 +1778,7 @@ function render(){
     (vmeta && vmeta.desc ? '<p class="viewdesc">' + vmeta.desc + "</p>" : "") +
     viewBody(current) + "</section>";
   ["area","proj","ceo","due"].forEach(function(k){ el("w-" + k).classList.toggle("on", !!F[k]); });
+  pipeRail();
   save();
 }
 
@@ -1516,8 +1811,88 @@ function setCeo(itemId, boardId, colId, value, selEl){
     });
 }
 
+/* ---- Due date: editable only with Assistant tools on (1.3.0) ---- */
+var DUE_EDIT = null;   /* {id, val, busy} while a date box is open */
+var DUE_MSG = {};      /* item id -> {cls, t, tip} shown under the date */
+var DUE_HELD = false;  /* a redraw was skipped while the date box had focus */
+function dueHold(){
+  var a = document.activeElement;
+  if(DUE_EDIT && a && a.classList && a.classList.contains("duein")){ DUE_HELD = true; return true; }
+  return false;
+}
+function dueIso(s){ var m = String(s || "").match(/^\d{4}-\d{2}-\d{2}/); return m ? m[0] : ""; }
+function dueEditCell(d){
+  if(!ASSIST || !d.dueCol) return dueCell(d);
+  var m = DUE_MSG[d.id];
+  var msg = m ? '<span class="stmsg' + (m.cls ? " " + m.cls : "") + '"' + (m.tip ? ' title="' + esc(m.tip) + '"' : "") + ">" + esc(m.t) + "</span>" : "";
+  if(DUE_EDIT && DUE_EDIT.id === d.id){
+    var dis = DUE_EDIT.busy ? " disabled" : "";
+    return '<div class="duebox"><div class="dueedit">' +
+      '<input type="date" class="duein" data-due-in="' + d.id + '" value="' + esc(DUE_EDIT.val) + '" aria-label="Due date for ' + esc(d.name) + '"' + dis + ">" +
+      '<button type="button" class="go" data-due-save="' + d.id + '"' + dis + ">Save</button>" +
+      '<button type="button" data-due-cancel="' + d.id + '"' + dis + ">Cancel</button></div>" + msg + "</div>";
+  }
+  return '<div class="duebox"><button type="button" class="duebtn" data-due-edit="' + d.id + '" title="Change the due date on Monday">' +
+    dueCell(d) + '<span class="pen">change</span></button>' + msg + "</div>";
+}
+function openDue(id){
+  var d = BY_ID[id]; if(!d || !ASSIST || !d.dueCol) return;
+  DUE_EDIT = {id:id, val:dueIso(d.due), busy:false}; delete DUE_MSG[id]; render();
+  var i = document.querySelector('[data-due-in="' + id + '"]'); if(i) i.focus();
+}
+function closeDue(){ var id = DUE_EDIT && DUE_EDIT.id; DUE_EDIT = null; if(id) delete DUE_MSG[id]; render(); }
+function saveDue(id){
+  var d = BY_ID[id];
+  if(!d || !DUE_EDIT || DUE_EDIT.id !== id || DUE_EDIT.busy) return Promise.resolve();
+  var inp = document.querySelector('[data-due-in="' + id + '"]');
+  var v = dueIso(inp ? inp.value : DUE_EDIT.val), y = +v.slice(0, 4);
+  if(inp) inp.blur();
+  if(!v){ DUE_MSG[id] = {cls:"err", t:"Pick a date first"}; render(); return Promise.resolve(); }
+  if(y < 2000 || y > 2100){ DUE_EDIT.val = v; DUE_MSG[id] = {cls:"err", t:"Check the year"}; render(); return Promise.resolve(); }
+  if(v === dueIso(d.due)){ closeDue(); return Promise.resolve(); }
+  if(!MCP){ DUE_EDIT = null; DUE_MSG[id] = {cls:"err", t:"Not connected to Monday"}; render(); return Promise.resolve(); }
+  DUE_EDIT.val = v; DUE_EDIT.busy = true; DUE_MSG[id] = {cls:"", t:"saving…"}; render();
+  var o = {}; o[d.dueCol] = {date:v};
+  return MCP.callTool(MONDAY, "change_item_column_values",
+      {boardId:Number(d.boardId), itemId:Number(id), columnValues:JSON.stringify(o)}, {cache:false})
+    .then(function(){
+      d.due = v; DUE_EDIT = null; DUE_MSG[id] = {cls:"ok", t:"saved"}; render();
+      setTimeout(function(){ if(DUE_MSG[id] && DUE_MSG[id].t === "saved"){ delete DUE_MSG[id]; render(); } }, 4000);
+    })
+    .catch(function(err){
+      DUE_EDIT = null;   /* the old date stays: d.due was not touched */
+      var m = mcpMessage(err && err.code, err && err.message);
+      DUE_MSG[id] = {cls:"err", t: /^Couldn't read/.test(m.t) ? "Couldn't save to Monday" : m.t, tip:m.m};
+      render();
+    });
+}
+document.addEventListener("click", function(e){
+  if(FORM || !e.target.closest) return;
+  var b = e.target.closest("[data-due-edit]");
+  if(b){ openDue(b.dataset.dueEdit); return; }
+  b = e.target.closest("[data-due-save]");
+  if(b){ saveDue(b.dataset.dueSave); return; }
+  if(e.target.closest("[data-due-cancel]")){ closeDue(); return; }
+});
+document.addEventListener("input", function(e){
+  if(DUE_EDIT && e.target.classList && e.target.classList.contains("duein")) DUE_EDIT.val = e.target.value;
+});
+document.addEventListener("keydown", function(e){
+  if(!DUE_EDIT || !e.target.classList || !e.target.classList.contains("duein")) return;
+  if(e.key === "Enter"){ e.preventDefault(); saveDue(DUE_EDIT.id); }
+  else if(e.key === "Escape"){ e.preventDefault(); e.target.blur(); closeDue(); }
+});
+document.addEventListener("focusout", function(e){
+  if(!e.target.classList || !e.target.classList.contains("duein") || !DUE_HELD) return;
+  /* run the skipped redraw once the picker has closed; wait a moment if focus went to Save/Cancel so their click lands */
+  var near = e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest(".dueedit");
+  setTimeout(function(){ if(DUE_HELD && !dueHold()){ DUE_HELD = false; render(); } }, near ? 400 : 250);
+});
+
 /* ============================ events ============================ */
 document.addEventListener("click", function(e){
+  var ps = e.target.closest("[data-psort]");
+  if(ps){ pipeSort(ps.dataset.psort); return; }
   var s = e.target.closest("[data-sort]");
   if(s){ var k = s.dataset.sort; if(sortBy === k) sortDir = -sortDir; else { sortBy = k; sortDir = 1; } render(); return; }
   var n = e.target.closest("[data-node]");
@@ -1615,7 +1990,7 @@ function readPerm(){
     .then(function(r){ MCP = r[0] || null; PERMS = r[1] || null; return readPerm(); })
     .then(function(){ load(); }, function(){ load(); });
   var tg = el("assist-toggle");
-  function paintAssist(){ tg.checked = ASSIST; el("assist-label").className = ASSIST ? "on" : ""; el("assist-label").textContent = ASSIST ? "Assistant tools on — + Task shows on each email" : "Assistant tools"; }
+  function paintAssist(){ tg.checked = ASSIST; el("assist-label").className = ASSIST ? "on" : ""; el("assist-label").textContent = ASSIST ? "Assistant tools on — + Task on each email, due dates can be changed" : "Assistant tools"; }
   paintAssist();
   tg.addEventListener("change", function(){ ASSIST = tg.checked; try{ localStorage.setItem("gd-assist", ASSIST ? "1" : "0"); }catch(e){} paintAssist(); if(LOADED) render(); });
   var s = (window.claude && window.claude.use) ? window.claude.use("sample") : Promise.resolve(null);
