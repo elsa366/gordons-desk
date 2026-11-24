@@ -197,6 +197,16 @@ select.stsel option{background:var(--surface);color:var(--ink)}
 .stmsg.err{color:var(--late-fg);font-family:var(--f-body);font-weight:500;letter-spacing:0}
 .stmsg.ok{color:var(--ok-fg)}
 .stpill{display:inline-flex;align-items:center;font-size:11.5px;font-weight:600;border-radius:999px;padding:4px 9px;white-space:nowrap}
+.duebox{display:flex;flex-direction:column;gap:3px;align-items:flex-start;min-width:0}
+.duebtn{border:0;background:none;padding:0;font:inherit;color:inherit;cursor:pointer;text-align:left}
+.duebtn:hover .due{text-decoration:underline dotted}
+.duebtn .pen{font-size:10.5px;color:var(--ink3);margin-left:5px}
+.duebtn:hover .pen{color:var(--accent)}
+.dueedit{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.dueedit input[type=date]{font:inherit;font-size:12px;padding:2px 4px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);max-width:146px}
+.dueedit button{font-size:11px;font-weight:600;border:0;border-radius:6px;padding:2px 8px;background:var(--sunk);color:var(--ink2);cursor:pointer}
+.dueedit button.go{background:var(--accent);color:#fff}
+.dueedit button:disabled{opacity:.5;cursor:default}
 
 .due{font-family:var(--f-mono);font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--ink2);white-space:normal;line-height:1.3;display:inline-block}
 .due.late{color:var(--late-fg);font-weight:500}
@@ -372,7 +382,7 @@ select.stsel option{background:var(--surface);color:var(--ink)}
   <footer class="foot">
     <span id="foot-1">Read live each time this page opens: every Monday board with a CEO Status column (plus anything Gordon logged for someone else), the Gmail threads under GD To Check, and the calendar for the fortnight ahead. Click any heading to fold it away.</span>
     <span>Shows anything assigned to Gordon, or carrying a CEO Status. Finished work moves to Completed. Items at Request for CEO wait for the assistant's triage and are not shown here.</span>
-    <label class="aswitch" title="For the assistant: adds a + Task button on each email that creates the item on Monday"><input type="checkbox" id="assist-toggle"> <span id="assist-label">Assistant tools</span></label>
+    <label class="aswitch" title="For the assistant: adds a + Task button on each email that creates the item on Monday, and lets due dates be changed on Monday"><input type="checkbox" id="assist-toggle"> <span id="assist-label">Assistant tools</span></label>
     <span id="foot-ver" class="foot-ver" title="Version of the dashboard script this page is running"></span>
   </footer>
 </div>
@@ -656,7 +666,7 @@ function loadBoard(b){
         status: get(COL.status), golive: get(COL.golive), link: get(COL.link),
         task: get(COL.task) || get(COL.task2),
         logged: get(COL.logged) || get(COL.logged2),
-        ceoCol: b.cols[COL.ceo]
+        ceoCol: b.cols[COL.ceo], dueCol: b.cols[COL.due] || ""
       };
     }
   }).catch(function(err){
@@ -880,7 +890,7 @@ function row(n, depth, opts){
     "</div>" +
     '<div class="r-type"><span class="type t-' + String(o.work || "").replace(/\s/g,"") + '">' + esc(WORK_LABEL[o.work] || (d ? "—" : "parent")) + "</span></div>" +
     (d ? statusSelect(d) : '<div class="stcell"><span class="stpill v-none">not his item</span></div>') +
-    '<div class="r-due">' + (d ? dueCell(d) : "") + "</div>" +
+    '<div class="r-due">' + (d ? dueEditCell(d) : "") + "</div>" +
     '<a class="open" href="' + esc(o.url || "#") + '" target="_blank" rel="noopener" title="Open in Monday" aria-label="Open in Monday">' +
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg></a>' +
     "</div>";
@@ -1470,6 +1480,7 @@ function renderNotice(){
   n.innerHTML = "";
 }
 function render(){
+  if(dueHold()) return; DUE_HELD = false;
   renderTabs(); renderStrip(); renderNotice();
   el("rail").hidden = !LOADED;
   var host = el("views");
@@ -1515,6 +1526,84 @@ function setCeo(itemId, boardId, colId, value, selEl){
       if(msg){ msg.className = "stmsg err"; msg.textContent = m.t; }
     });
 }
+
+/* ---- Due date: editable only with Assistant tools on (1.3.0) ---- */
+var DUE_EDIT = null;   /* {id, val, busy} while a date box is open */
+var DUE_MSG = {};      /* item id -> {cls, t, tip} shown under the date */
+var DUE_HELD = false;  /* a redraw was skipped while the date box had focus */
+function dueHold(){
+  var a = document.activeElement;
+  if(DUE_EDIT && a && a.classList && a.classList.contains("duein")){ DUE_HELD = true; return true; }
+  return false;
+}
+function dueIso(s){ var m = String(s || "").match(/^\d{4}-\d{2}-\d{2}/); return m ? m[0] : ""; }
+function dueEditCell(d){
+  if(!ASSIST || !d.dueCol) return dueCell(d);
+  var m = DUE_MSG[d.id];
+  var msg = m ? '<span class="stmsg' + (m.cls ? " " + m.cls : "") + '"' + (m.tip ? ' title="' + esc(m.tip) + '"' : "") + ">" + esc(m.t) + "</span>" : "";
+  if(DUE_EDIT && DUE_EDIT.id === d.id){
+    var dis = DUE_EDIT.busy ? " disabled" : "";
+    return '<div class="duebox"><div class="dueedit">' +
+      '<input type="date" class="duein" data-due-in="' + d.id + '" value="' + esc(DUE_EDIT.val) + '" aria-label="Due date for ' + esc(d.name) + '"' + dis + ">" +
+      '<button type="button" class="go" data-due-save="' + d.id + '"' + dis + ">Save</button>" +
+      '<button type="button" data-due-cancel="' + d.id + '"' + dis + ">Cancel</button></div>" + msg + "</div>";
+  }
+  return '<div class="duebox"><button type="button" class="duebtn" data-due-edit="' + d.id + '" title="Change the due date on Monday">' +
+    dueCell(d) + '<span class="pen">change</span></button>' + msg + "</div>";
+}
+function openDue(id){
+  var d = BY_ID[id]; if(!d || !ASSIST || !d.dueCol) return;
+  DUE_EDIT = {id:id, val:dueIso(d.due), busy:false}; delete DUE_MSG[id]; render();
+  var i = document.querySelector('[data-due-in="' + id + '"]'); if(i) i.focus();
+}
+function closeDue(){ var id = DUE_EDIT && DUE_EDIT.id; DUE_EDIT = null; if(id) delete DUE_MSG[id]; render(); }
+function saveDue(id){
+  var d = BY_ID[id];
+  if(!d || !DUE_EDIT || DUE_EDIT.id !== id || DUE_EDIT.busy) return Promise.resolve();
+  var inp = document.querySelector('[data-due-in="' + id + '"]');
+  var v = dueIso(inp ? inp.value : DUE_EDIT.val), y = +v.slice(0, 4);
+  if(inp) inp.blur();
+  if(!v){ DUE_MSG[id] = {cls:"err", t:"Pick a date first"}; render(); return Promise.resolve(); }
+  if(y < 2000 || y > 2100){ DUE_EDIT.val = v; DUE_MSG[id] = {cls:"err", t:"Check the year"}; render(); return Promise.resolve(); }
+  if(v === dueIso(d.due)){ closeDue(); return Promise.resolve(); }
+  if(!MCP){ DUE_EDIT = null; DUE_MSG[id] = {cls:"err", t:"Not connected to Monday"}; render(); return Promise.resolve(); }
+  DUE_EDIT.val = v; DUE_EDIT.busy = true; DUE_MSG[id] = {cls:"", t:"saving…"}; render();
+  var o = {}; o[d.dueCol] = {date:v};
+  return MCP.callTool(MONDAY, "change_item_column_values",
+      {boardId:Number(d.boardId), itemId:Number(id), columnValues:JSON.stringify(o)}, {cache:false})
+    .then(function(){
+      d.due = v; DUE_EDIT = null; DUE_MSG[id] = {cls:"ok", t:"saved"}; render();
+      setTimeout(function(){ if(DUE_MSG[id] && DUE_MSG[id].t === "saved"){ delete DUE_MSG[id]; render(); } }, 4000);
+    })
+    .catch(function(err){
+      DUE_EDIT = null;   /* the old date stays: d.due was not touched */
+      var m = mcpMessage(err && err.code, err && err.message);
+      DUE_MSG[id] = {cls:"err", t: /^Couldn't read/.test(m.t) ? "Couldn't save to Monday" : m.t, tip:m.m};
+      render();
+    });
+}
+document.addEventListener("click", function(e){
+  if(FORM || !e.target.closest) return;
+  var b = e.target.closest("[data-due-edit]");
+  if(b){ openDue(b.dataset.dueEdit); return; }
+  b = e.target.closest("[data-due-save]");
+  if(b){ saveDue(b.dataset.dueSave); return; }
+  if(e.target.closest("[data-due-cancel]")){ closeDue(); return; }
+});
+document.addEventListener("input", function(e){
+  if(DUE_EDIT && e.target.classList && e.target.classList.contains("duein")) DUE_EDIT.val = e.target.value;
+});
+document.addEventListener("keydown", function(e){
+  if(!DUE_EDIT || !e.target.classList || !e.target.classList.contains("duein")) return;
+  if(e.key === "Enter"){ e.preventDefault(); saveDue(DUE_EDIT.id); }
+  else if(e.key === "Escape"){ e.preventDefault(); e.target.blur(); closeDue(); }
+});
+document.addEventListener("focusout", function(e){
+  if(!e.target.classList || !e.target.classList.contains("duein") || !DUE_HELD) return;
+  /* run the skipped redraw once the picker has closed; wait a moment if focus went to Save/Cancel so their click lands */
+  var near = e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest(".dueedit");
+  setTimeout(function(){ if(DUE_HELD && !dueHold()){ DUE_HELD = false; render(); } }, near ? 400 : 250);
+});
 
 /* ============================ events ============================ */
 document.addEventListener("click", function(e){
@@ -1615,7 +1704,7 @@ function readPerm(){
     .then(function(r){ MCP = r[0] || null; PERMS = r[1] || null; return readPerm(); })
     .then(function(){ load(); }, function(){ load(); });
   var tg = el("assist-toggle");
-  function paintAssist(){ tg.checked = ASSIST; el("assist-label").className = ASSIST ? "on" : ""; el("assist-label").textContent = ASSIST ? "Assistant tools on — + Task shows on each email" : "Assistant tools"; }
+  function paintAssist(){ tg.checked = ASSIST; el("assist-label").className = ASSIST ? "on" : ""; el("assist-label").textContent = ASSIST ? "Assistant tools on — + Task on each email, due dates can be changed" : "Assistant tools"; }
   paintAssist();
   tg.addEventListener("change", function(){ ASSIST = tg.checked; try{ localStorage.setItem("gd-assist", ASSIST ? "1" : "0"); }catch(e){} paintAssist(); if(LOADED) render(); });
   var s = (window.claude && window.claude.use) ? window.claude.use("sample") : Promise.resolve(null);
